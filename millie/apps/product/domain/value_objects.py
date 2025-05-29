@@ -1,0 +1,32 @@
+from enum import Enum
+
+
+class Feature(Enum):
+    MONTHLY_RECOMMEND = "MONTHLY_RECOMMEND"
+    NEW_ARRIVAL = "NEW_ARRIVAL"
+    BEST_SELLER = "BEST_SELLER"
+
+
+class Category(Enum):
+    FICTION = "FICTION"
+    NON_FICTION = "NON_FICTION"
+    SCIENCE = "SCIENCE"
+    TECHNOLOGY = "TECHNOLOGY"
+    SELF_HELP = "SELF_HELP"
+    BUSINESS = "BUSINESS"
+    HISTORY = "HISTORY"
+    BIOGRAPHY = "BIOGRAPHY"
+    PHILOSOPHY = "PHILOSOPHY"
+    RELIGION = "RELIGION"
+    OTHER = "OTHER"
+
+
+class ProductStatus(Enum):
+    ACTIVE = "ACTIVE"
+    SOLD_OUT = "SOLD_OUT"
+    DISCONTINUED = "DISCONTINUED"
+
+
+class VisibilityStatus(Enum):
+    ACTIVE = "ACTIVE"
+    HIDDEN = "HIDDEN"
