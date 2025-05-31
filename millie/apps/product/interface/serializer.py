@@ -1,5 +1,7 @@
 from rest_framework import serializers
 from apps.product.domain.entity import Product
+from apps.pricing.domain.discount_policy import PriceResult
+from decimal import Decimal
 
 
 class ProductSerializer(serializers.Serializer):
@@ -25,3 +27,34 @@ class ProductSerializer(serializers.Serializer):
 
     def get_discount_price(self, obj: Product):
         return float(obj.discount_price)
+
+
+class ProductDetailSerializer(serializers.Serializer):
+
+    discount_policy = serializers.SerializerMethodField()
+    discount_amount = serializers.SerializerMethodField()
+    discount_price = serializers.SerializerMethodField()
+
+    def get_discount_policy(
+        self,
+        obj: PriceResult,
+    ) -> str:
+        return obj.discount_type
+
+    def get_discount_amount(
+        self,
+        obj: PriceResult,
+    ) -> Decimal:
+        return obj.discount_amount
+
+    def get_discount_price(
+        self,
+        obj: PriceResult,
+    ) -> Decimal:
+        return obj.discounted
+
+    # def get_discount_type(
+    #     self,
+    #     obj: PriceResult,
+    # ) -> str:
+    #     return obj.discount_type

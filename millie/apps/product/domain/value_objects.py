@@ -1,13 +1,19 @@
 from enum import Enum
 
 
-class Feature(Enum):
+class ChoiceEnum(Enum):
+    @classmethod
+    def choices(cls):
+        return [(choice.value, choice.name) for choice in cls]
+
+
+class Feature(ChoiceEnum):
     MONTHLY_RECOMMEND = "MONTHLY_RECOMMEND"
     NEW_ARRIVAL = "NEW_ARRIVAL"
     BEST_SELLER = "BEST_SELLER"
 
 
-class Category(Enum):
+class Category(ChoiceEnum):
     FICTION = "FICTION"
     NON_FICTION = "NON_FICTION"
     SCIENCE = "SCIENCE"
@@ -21,12 +27,12 @@ class Category(Enum):
     OTHER = "OTHER"
 
 
-class ProductStatus(Enum):
+class ProductStatus(ChoiceEnum):
     ACTIVE = "ACTIVE"
     SOLD_OUT = "SOLD_OUT"
     DISCONTINUED = "DISCONTINUED"
 
 
-class VisibilityStatus(Enum):
-    ACTIVE = "ACTIVE"
+class VisibilityStatus(ChoiceEnum):
+    VISIBLE = "VISIBLE"
     HIDDEN = "HIDDEN"

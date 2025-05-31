@@ -23,6 +23,7 @@ class ProductMapper:
             created_at=book_model.created_at,
             updated_at=book_model.updated_at,
         )
+
     # def to_domain(
     #     book_model: BookModel,
     #     book_detail_model: BookDetailModel,

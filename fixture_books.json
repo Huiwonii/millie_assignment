@@ -16,8 +16,8 @@
     "model": "product.bookdetail",
     "pk": 1,
     "fields": {
-      "book_code": 1,
-      "category": "카테고리 1",
+      "book_code": "BOOK001",
+      "category": "FICTION",
       "description": "이것은 테스트 도서 1의 설명입니다.",
       "status": "VISIBLE",
       "created_at": "2025-05-29T15:49:02Z",
@@ -28,7 +28,7 @@
     "model": "product.bookfeature",
     "pk": 1,
     "fields": {
-      "book_code": 1,
+      "book_code": "BOOK001",
       "feature": "Feature Type 1",
       "status": "VISIBLE",
       "created_at": "2025-05-29T15:49:02Z",
@@ -39,7 +39,7 @@
     "model": "product.publishinfo",
     "pk": 1,
     "fields": {
-      "book_code": 1,
+      "book_code": "BOOK001",
       "publisher": "출판사 1",
       "published_date": "2023-01-01",
       "status": "VISIBLE",
@@ -51,7 +51,7 @@
     "model": "product.author",
     "pk": 1,
     "fields": {
-      "book_code": 1,
+      "book_code": "BOOK001",
       "author": "저자 1",
       "status": "VISIBLE",
       "created_at": "2025-05-29T15:49:02Z",
@@ -75,8 +75,8 @@
     "model": "product.bookdetail",
     "pk": 2,
     "fields": {
-      "book_code": 2,
-      "category": "카테고리 2",
+      "book_code": "BOOK002",
+      "category": "NON_FICTION",
       "description": "이것은 테스트 도서 2의 설명입니다.",
       "status": "VISIBLE",
       "created_at": "2025-05-29T15:49:02Z",
@@ -87,8 +87,8 @@
     "model": "product.bookfeature",
     "pk": 2,
     "fields": {
-      "book_code": 2,
-      "feature": "Feature Type 0",
+      "book_code": "BOOK002",
+      "feature": "MONTHLY_RECOMMEND",
       "status": "VISIBLE",
       "created_at": "2025-05-29T15:49:02Z",
       "updated_at": "2025-05-29T15:49:02Z"
@@ -98,7 +98,7 @@
     "model": "product.publishinfo",
     "pk": 2,
     "fields": {
-      "book_code": 2,
+      "book_code": "BOOK002",
       "publisher": "출판사 2",
       "published_date": "2023-02-01",
       "status": "VISIBLE",
@@ -110,7 +110,7 @@
     "model": "product.author",
     "pk": 2,
     "fields": {
-      "book_code": 2,
+      "book_code": "BOOK002",
       "author": "저자 2",
       "status": "VISIBLE",
       "created_at": "2025-05-29T15:49:02Z",
@@ -134,8 +134,8 @@
     "model": "product.bookdetail",
     "pk": 3,
     "fields": {
-      "book_code": 3,
-      "category": "카테고리 0",
+      "book_code": "BOOK003",
+      "category": "SCIENCE",
       "description": "이것은 테스트 도서 3의 설명입니다.",
       "status": "VISIBLE",
       "created_at": "2025-05-29T15:49:02Z",
@@ -146,8 +146,8 @@
     "model": "product.bookfeature",
     "pk": 3,
     "fields": {
-      "book_code": 3,
-      "feature": "Feature Type 1",
+      "book_code": "BOOK003",
+      "feature": "BEST_SELLER",
       "status": "VISIBLE",
       "created_at": "2025-05-29T15:49:02Z",
       "updated_at": "2025-05-29T15:49:02Z"
@@ -157,7 +157,7 @@
     "model": "product.publishinfo",
     "pk": 3,
     "fields": {
-      "book_code": 3,
+      "book_code": "BOOK003",
       "publisher": "출판사 3",
       "published_date": "2023-03-01",
       "status": "VISIBLE",
@@ -169,7 +169,7 @@
     "model": "product.author",
     "pk": 3,
     "fields": {
-      "book_code": 3,
+      "book_code": "BOOK003",
       "author": "저자 3",
       "status": "VISIBLE",
       "created_at": "2025-05-29T15:49:02Z",
@@ -193,8 +193,8 @@
     "model": "product.bookdetail",
     "pk": 4,
     "fields": {
-      "book_code": 4,
-      "category": "카테고리 1",
+      "book_code": "BOOK004",
+      "category": "BUSINESS",
       "description": "이것은 테스트 도서 4의 설명입니다.",
       "status": "VISIBLE",
       "created_at": "2025-05-29T15:49:02Z",
@@ -205,8 +205,8 @@
     "model": "product.bookfeature",
     "pk": 4,
     "fields": {
-      "book_code": 4,
-      "feature": "Feature Type 0",
+      "book_code": "BOOK004",
+      "feature": "NEW_ARRIVAL",
       "status": "VISIBLE",
       "created_at": "2025-05-29T15:49:02Z",
       "updated_at": "2025-05-29T15:49:02Z"
@@ -216,7 +216,7 @@
     "model": "product.publishinfo",
     "pk": 4,
     "fields": {
-      "book_code": 4,
+      "book_code": "BOOK004",
       "publisher": "출판사 4",
       "published_date": "2023-04-01",
       "status": "VISIBLE",
@@ -228,7 +228,7 @@
     "model": "product.author",
     "pk": 4,
     "fields": {
-      "book_code": 4,
+      "book_code": "BOOK004",
       "author": "저자 4",
       "status": "VISIBLE",
       "created_at": "2025-05-29T15:49:02Z",
@@ -252,8 +252,8 @@
     "model": "product.bookdetail",
     "pk": 5,
     "fields": {
-      "book_code": 5,
-      "category": "카테고리 2",
+      "book_code": "BOOK005",
+      "category": "SELF_HELP",
       "description": "이것은 테스트 도서 5의 설명입니다.",
       "status": "VISIBLE",
       "created_at": "2025-05-29T15:49:02Z",
@@ -264,8 +264,8 @@
     "model": "product.bookfeature",
     "pk": 5,
     "fields": {
-      "book_code": 5,
-      "feature": "Feature Type 1",
+      "book_code": "BOOK005",
+      "feature": "MONTHLY_RECOMMEND",
       "status": "VISIBLE",
       "created_at": "2025-05-29T15:49:02Z",
       "updated_at": "2025-05-29T15:49:02Z"
@@ -275,7 +275,7 @@
     "model": "product.publishinfo",
     "pk": 5,
     "fields": {
-      "book_code": 5,
+      "book_code": "BOOK005",
       "publisher": "출판사 5",
       "published_date": "2023-05-01",
       "status": "VISIBLE",
@@ -287,7 +287,7 @@
     "model": "product.author",
     "pk": 5,
     "fields": {
-      "book_code": 5,
+      "book_code": "BOOK005",
       "author": "저자 5",
       "status": "VISIBLE",
       "created_at": "2025-05-29T15:49:02Z",
@@ -311,8 +311,8 @@
     "model": "product.bookdetail",
     "pk": 6,
     "fields": {
-      "book_code": 6,
-      "category": "카테고리 0",
+      "book_code": "BOOK006",
+      "category": "HISTORY",
       "description": "이것은 테스트 도서 6의 설명입니다.",
       "status": "VISIBLE",
       "created_at": "2025-05-29T15:49:02Z",
@@ -323,8 +323,8 @@
     "model": "product.bookfeature",
     "pk": 6,
     "fields": {
-      "book_code": 6,
-      "feature": "Feature Type 0",
+      "book_code": "BOOK006",
+      "feature": "NEW_ARRIVAL",
       "status": "VISIBLE",
       "created_at": "2025-05-29T15:49:02Z",
       "updated_at": "2025-05-29T15:49:02Z"
@@ -334,7 +334,7 @@
     "model": "product.publishinfo",
     "pk": 6,
     "fields": {
-      "book_code": 6,
+      "book_code": "BOOK006",
       "publisher": "출판사 6",
       "published_date": "2023-06-01",
       "status": "VISIBLE",
@@ -346,7 +346,7 @@
     "model": "product.author",
     "pk": 6,
     "fields": {
-      "book_code": 6,
+      "book_code": "BOOK006",
       "author": "저자 6",
       "status": "VISIBLE",
       "created_at": "2025-05-29T15:49:02Z",
@@ -370,8 +370,8 @@
     "model": "product.bookdetail",
     "pk": 7,
     "fields": {
-      "book_code": 7,
-      "category": "카테고리 1",
+      "book_code": "BOOK007",
+      "category": "PHILOSOPHY",
       "description": "이것은 테스트 도서 7의 설명입니다.",
       "status": "VISIBLE",
       "created_at": "2025-05-29T15:49:02Z",
@@ -382,8 +382,8 @@
     "model": "product.bookfeature",
     "pk": 7,
     "fields": {
-      "book_code": 7,
-      "feature": "Feature Type 1",
+      "book_code": "BOOK007",
+      "feature": "BEST_SELLER",
       "status": "VISIBLE",
       "created_at": "2025-05-29T15:49:02Z",
       "updated_at": "2025-05-29T15:49:02Z"
@@ -393,7 +393,7 @@
     "model": "product.publishinfo",
     "pk": 7,
     "fields": {
-      "book_code": 7,
+      "book_code": "BOOK007",
       "publisher": "출판사 7",
       "published_date": "2023-07-01",
       "status": "VISIBLE",
@@ -405,7 +405,7 @@
     "model": "product.author",
     "pk": 7,
     "fields": {
-      "book_code": 7,
+      "book_code": "BOOK007",
       "author": "저자 7",
       "status": "VISIBLE",
       "created_at": "2025-05-29T15:49:02Z",
@@ -429,8 +429,8 @@
     "model": "product.bookdetail",
     "pk": 8,
     "fields": {
-      "book_code": 8,
-      "category": "카테고리 2",
+      "book_code": "BOOK008",
+      "category": "RELIGION",
       "description": "이것은 테스트 도서 8의 설명입니다.",
       "status": "VISIBLE",
       "created_at": "2025-05-29T15:49:02Z",
@@ -441,8 +441,8 @@
     "model": "product.bookfeature",
     "pk": 8,
     "fields": {
-      "book_code": 8,
-      "feature": "Feature Type 0",
+      "book_code": "BOOK008",
+      "feature": "NEW_ARRIVAL",
       "status": "VISIBLE",
       "created_at": "2025-05-29T15:49:02Z",
       "updated_at": "2025-05-29T15:49:02Z"
@@ -452,7 +452,7 @@
     "model": "product.publishinfo",
     "pk": 8,
     "fields": {
-      "book_code": 8,
+      "book_code": "BOOK008",
       "publisher": "출판사 8",
       "published_date": "2023-08-01",
       "status": "VISIBLE",
@@ -464,7 +464,7 @@
     "model": "product.author",
     "pk": 8,
     "fields": {
-      "book_code": 8,
+      "book_code": "BOOK008",
       "author": "저자 8",
       "status": "VISIBLE",
       "created_at": "2025-05-29T15:49:02Z",
@@ -488,8 +488,8 @@
     "model": "product.bookdetail",
     "pk": 9,
     "fields": {
-      "book_code": 9,
-      "category": "카테고리 0",
+      "book_code": "BOOK009",
+      "category": "OTHER",
       "description": "이것은 테스트 도서 9의 설명입니다.",
       "status": "VISIBLE",
       "created_at": "2025-05-29T15:49:02Z",
@@ -500,8 +500,8 @@
     "model": "product.bookfeature",
     "pk": 9,
     "fields": {
-      "book_code": 9,
-      "feature": "Feature Type 1",
+      "book_code": "BOOK009",
+      "feature": "MONTHLY_RECOMMEND",
       "status": "VISIBLE",
       "created_at": "2025-05-29T15:49:02Z",
       "updated_at": "2025-05-29T15:49:02Z"
@@ -511,7 +511,7 @@
     "model": "product.publishinfo",
     "pk": 9,
     "fields": {
-      "book_code": 9,
+      "book_code": "BOOK009",
       "publisher": "출판사 9",
       "published_date": "2023-09-01",
       "status": "VISIBLE",
@@ -523,7 +523,7 @@
     "model": "product.author",
     "pk": 9,
     "fields": {
-      "book_code": 9,
+      "book_code": "BOOK009",
       "author": "저자 9",
       "status": "VISIBLE",
       "created_at": "2025-05-29T15:49:02Z",
@@ -547,8 +547,8 @@
     "model": "product.bookdetail",
     "pk": 10,
     "fields": {
-      "book_code": 10,
-      "category": "카테고리 1",
+      "book_code": "BOOK010",
+      "category": "OTHER",
       "description": "이것은 테스트 도서 10의 설명입니다.",
       "status": "VISIBLE",
       "created_at": "2025-05-29T15:49:02Z",
@@ -559,8 +559,8 @@
     "model": "product.bookfeature",
     "pk": 10,
     "fields": {
-      "book_code": 10,
-      "feature": "Feature Type 0",
+      "book_code": "BOOK010",
+      "feature": "MONTHLY_RECOMMEND",
       "status": "VISIBLE",
       "created_at": "2025-05-29T15:49:02Z",
       "updated_at": "2025-05-29T15:49:02Z"
@@ -570,7 +570,7 @@
     "model": "product.publishinfo",
     "pk": 10,
     "fields": {
-      "book_code": 10,
+      "book_code": "BOOK010",
       "publisher": "출판사 10",
       "published_date": "2023-10-01",
       "status": "VISIBLE",
@@ -582,7 +582,7 @@
     "model": "product.author",
     "pk": 10,
     "fields": {
-      "book_code": 10,
+      "book_code": "BOOK010",
       "author": "저자 10",
       "status": "VISIBLE",
       "created_at": "2025-05-29T15:49:02Z",
