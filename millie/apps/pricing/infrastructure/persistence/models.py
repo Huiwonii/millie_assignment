@@ -50,7 +50,6 @@ class Coupon(models.Model):
     id = models.UUIDField(primary_key=True, default=UUID, editable=False)
     code = models.CharField(max_length=255, null=False, db_comment="쿠폰 코드")
     name = models.CharField(max_length=255, null=False, db_comment="쿠폰 이름")
-    discount_policy = models.CharField(max_length=255, null=False, db_comment="할인 정책")
     # way_to_issue = models.CharField(max_length=255, null=False, db_comment="발급 방식") # TODO! 삭제검토
     valid_until = models.DateTimeField(null=False, db_comment="유효 기간")
     status = models.CharField(max_length=255, null=False, db_comment="사용 상태")
@@ -82,11 +81,13 @@ class User(models.Model):
 # class IssuedCoupon(models.Model):
 #     """
 #     Coupon을 발급하는 경우 발급된 쿠폰의 정보를 저장하는 테이블
+#     (각 유저에 대한 개별발급 확장 가능성)
 #     """
 #     id = models.UUIDField(primary_key=True, default=UUID, editable=False)
 #     coupon = models.ForeignKey(Coupon, to_field="code", null=False, on_delete=models.CASCADE, db_comment="쿠폰")
 #     issued_coupon_id = models.CharField(max_length=255, null=False, db_comment="발급된 쿠폰 id")  # 난수번호등
 #     user = models.ForeignKey(User, null=False, on_delete=models.CASCADE, db_comment="사용자")    # 특정 사용자만 사용가능하도록 하는 쿠폰의 경우
+#     ...
 #     created_at = models.DateTimeField(auto_now_add=True, null=False, db_comment="등록 일자")
 #     updated_at = models.DateTimeField(auto_now=True, db_comment="수정 일자")
 

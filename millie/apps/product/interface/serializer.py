@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from apps.product.domain.entity import Product
-from apps.pricing.domain.discount_policy import PriceResult
+from apps.pricing.domain.entity.price_result import PriceResult
 from decimal import Decimal
 
 
