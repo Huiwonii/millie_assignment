@@ -10,9 +10,13 @@ from apps.pricing.application.discount_service import DiscountService
 from apps.pricing.application.discount_service import CouponService
 from apps.pricing.domain.entity.price_result import PriceResult
 from apps.product.domain.value_objects import ProductStatus
+from apps.pricing.domain.policy.discount_policy import DiscountPolicy as DiscountPolicyStrategy
+from apps.pricing.domain.entity.price_result import PriceResult as PriceResultEntity
+from apps.pricing.domain.entity.coupon import Coupon as CouponDomainEntity
 
 
-class ProductDetailUseCase:
+
+class ProductDetailUseCaseBak:
     def __init__(
         self,
         product_repo: ProductRepositoryImpl,
@@ -48,6 +52,9 @@ class ProductDetailUseCase:
             product_code=code,
             user=user,
         )
+        print("B" * 100)
+        print(applicable_coupons)
+        print("B" * 100)
         #    → List[CouponDomainEntity]
 
         # 3)  “기본 할인(상품별/전체) 적용” 후 중간 가격 계산
@@ -80,4 +87,76 @@ class ProductDetailUseCase:
             # else: coupon_domain이 None → 코드가 틀렸거나 없는 쿠폰 → base_price_result 그대로
 
         # 5)  최종 리턴
+        return product_entity, applicable_coupons, final_price_result
+
+
+
+
+# apps/product/application/product_detail_use_case.py
+
+
+class ProductDetailUseCase:
+    def __init__(
+        self,
+        product_repo: ProductRepositoryImpl,
+        discount_service: DiscountService,
+        coupon_service: CouponService,
+    ):
+        self.product_repo = product_repo
+        self.discount_service = discount_service
+        self.coupon_service = coupon_service
+
+
+    def execute(
+        self,
+        code: str,
+        user=None,
+        coupon_code: Optional[str] = None,
+    ) -> Tuple[ProductEntity, List[CouponDomainEntity], PriceResult]:
+        # 1) 상품 조회
+        product_entity: ProductEntity = self.product_repo.get_product_by_code(code)
+        if not product_entity or product_entity.status != ProductStatus.ACTIVE.value:
+            # 존재하지 않거나 판매 불가 상태라면 예외 처리
+            raise Exception(f"해당 코드({code})의 상품이 없거나 판매 불가 상태입니다.")
+
+
+        # 2) 적용 가능한 쿠폰 목록 조회
+        applicable_coupons = self.coupon_service.get_applicable_coupons(
+            product_code=code,
+            user=user,
+        )
+
+        # 3) 기본 할인 적용
+        base_price = product_entity.price
+        base_price_result: PriceResultEntity = self.discount_service.apply_best_policy(
+            product_code=code,
+            user=user,
+            original_price=base_price,
+        )
+
+        # 4) 쿠폰 코드가 넘어왔다면 쿠폰 추가 할인 적용
+        final_price_result = base_price_result
+        if coupon_code:
+            coupon_domain = self.coupon_service.get_coupon_by_code(coupon_code)
+            # 4-1) coupon_domain 자체가 None이면 “잘못된 쿠폰 코드 or 이미 만료”이니 무시
+            if coupon_domain is not None:
+                # 4-2) 쿠폰이 실제 “상품/사용자 대상 + 유효 기간 + is_active”를 모두 통과해야 적용
+                if coupon_domain.is_available(user, product_entity.code):
+                    # 4-3) 이제 쿠폰 도메인 안에는 discount_policy(전략 객체)가 반드시 채워져 있어야 한다
+                    strategy: DiscountPolicyStrategy = coupon_domain.to_discount_policy()
+                    # base_price_result.discounted가 이미 적용된 가격이므로
+                    # “현재 금액”과 “지금까지 할인된 금액(base_price_result.discount_amount)”를 넘겨준다
+                    # final_price_result = strategy.apply(
+                    #     price=base_price_result.discounted,
+                    #     already_discounted_amount=base_price_result.discount_amount,
+                    # )
+                    final_price_result = strategy.apply(base_price_result.discounted)
+                else:
+                    # 쿠폰은 존재하지만 “이 상품/사용자에는 못 쓰는 쿠폰”이므로 그냥 무시
+                    final_price_result = base_price_result
+            else:
+                # coupon_domain is None인 경우(코드가 틀렸거나 이미 만료되었거나)
+                final_price_result = base_price_result
+
+        # 5) 리턴
         return product_entity, applicable_coupons, final_price_result

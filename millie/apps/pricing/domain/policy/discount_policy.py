@@ -40,6 +40,10 @@ class PercentageDiscountPolicy(DiscountPolicy):
     def discount_type(self) -> str:
         return self._discount_type
 
+    @property
+    def value(self) -> Decimal:
+        return self._discount_rate
+
 
 class FixedDiscountPolicy(DiscountPolicy):
 
@@ -72,4 +76,8 @@ class FixedDiscountPolicy(DiscountPolicy):
     @property
     def discount_type(self) -> str:
         return self._discount_type
+
+    @property
+    def value(self) -> Decimal:
+        return self._discount_amount
 

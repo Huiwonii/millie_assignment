@@ -89,7 +89,7 @@
     "fields": {
       "discount_policy": "800e0670-cbbc-4bfc-a30d-db569e8ebc79",
       "target_user_id": null,
-      "target_product_code": "BOOK003",
+      "target_product_code": null,
       "apply_priority": 1,
       "created_at": "2025-05-31T15:21:46.855469Z",
       "updated_at": "2025-05-31T15:21:46.855469Z"

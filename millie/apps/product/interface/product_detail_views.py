@@ -40,21 +40,28 @@ class ProductDetailView(APIView):
         coupon_code = request.query_params.get("coupon_code", None)
         user = request.user if request.user.is_authenticated else None
 
-        try:
-            product_entity, coupon_list, price_result = self.use_case.execute(
-                code=code,
-                user=user,
-                coupon_code=coupon_code,
-            )
-        except Exception as e:
-            return Response(
-                {
-                    "code": 404,
-                    "message": str(e),
-                    "data": None,
-                },
-                status=status.HTTP_404_NOT_FOUND,
-            )
+        # try:
+        product_entity, coupon_list, price_result = self.use_case.execute(
+            code=code,
+            user=user,
+            coupon_code=coupon_code,
+        )
+        print("A" * 100)
+        print(coupon_list)
+        print("A" * 100)
+        # except Exception as e:
+        #     return Response(
+        #         {
+        #             "code": 404,
+        #             "message": str(e),
+        #             "data": None,
+        #         },
+        #         status=status.HTTP_404_NOT_FOUND,
+        #     )
+
+        print("B" * 100)
+        print(coupon_list)
+        print("B" * 100)
 
         # 2) 직렬화
         serialized_product = ProductSerializer(product_entity).data

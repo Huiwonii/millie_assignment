@@ -30,28 +30,19 @@ class ProductSerializer(serializers.Serializer):
 
 
 class ProductDetailSerializer(serializers.Serializer):
-
     discount_policy = serializers.SerializerMethodField()
     discount_amount = serializers.SerializerMethodField()
     discount_price = serializers.SerializerMethodField()
 
-    def get_discount_policy(
-        self,
-        obj: PriceResult,
-    ) -> str:
-        return obj.discount_type
+    def get_discount_policy(self, obj):
+        return getattr(obj, 'discount_type', None)
 
-    def get_discount_amount(
-        self,
-        obj: PriceResult,
-    ) -> Decimal:
-        return obj.discount_amount
+    def get_discount_amount(self, obj):
+        return getattr(obj, 'discount_amount', None)
 
-    def get_discount_price(
-        self,
-        obj: PriceResult,
-    ) -> Decimal:
-        return obj.discounted
+    def get_discount_price(self, obj):
+        return getattr(obj, 'discounted', None)
+
 
     # def get_discount_type(
     #     self,

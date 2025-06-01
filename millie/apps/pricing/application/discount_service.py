@@ -36,11 +36,15 @@ class DiscountService:
         2) 선택된 policy_model 을 DiscountPolicyMapper.to_domain(...) → Percentage/Fixed 전략 객체
         3) strategy.apply(original_price) → PriceResult 리턴
         """
-        strategy: Optional[DiscountPolicyStrategy] = self.dp_repo.get_discount_policies(
+        strategy_list: Optional[List[DiscountPolicyStrategy]] = self.dp_repo.get_discount_policies(
             target_product_code=product_code,
             target_user_id=user.id if user else None,
         )
-        if not strategy:
+        print("G" * 100)
+        print(strategy_list)
+        print(len(strategy_list))
+        print("G" * 100)
+        if not strategy_list:
             # 적용할 정책이 없으면 그대로 PriceResult를 리턴 (할인 없음)
             return PriceResult(
                 original=original_price,
@@ -48,7 +52,8 @@ class DiscountService:
                 discount_amount=Decimal("0"),
             )
         # apply() 시 “추가 할인 전 이미 할인된 금액”은 0
-        return strategy.apply(price=original_price, already_discounted_amount=Decimal("0"))
+        best_strategy = strategy_list[0]
+        return best_strategy.apply(original_price)
 
 
 
@@ -79,6 +84,7 @@ class CouponService:
             # if coupon.is_active and coupon.is_available(user, product_code):
             if coupon.is_available(user, product_code):
                 result.append(coupon)
+
         return result
 
     def get_coupon_by_code(
@@ -93,4 +99,4 @@ class CouponService:
         coupon = self.coupon_repo.get_coupon_by_code(coupon_code)
         if not coupon:
             return None
-        return self.coupon_mapper.to_domain(coupon)
+        return coupon
