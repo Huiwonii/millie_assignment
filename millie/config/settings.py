@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'pymysql',
     'apps.product',
+    'apps.pricing',
 ]
 
 MIDDLEWARE = [

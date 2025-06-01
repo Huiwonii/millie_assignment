@@ -36,7 +36,7 @@ class ProductRepositoryImpl(ProductRepository):
         return [self.mapper.to_domain(book) for book in qs]
 
 
-    def get_product_by_id(
+    def get_product_by_code(
         self,
         code: str,
     ) -> ProductDomainEntity:
@@ -51,4 +51,4 @@ class ProductRepositoryImpl(ProductRepository):
         if not qs.exists():
             raise BookModel.DoesNotExist(f"Product with code {code} not found")
 
-        return self.mapper.to_domain(qs.first()) # TODO! 확인 
+        return self.mapper.to_domain(qs.first()) # TODO! 확인
