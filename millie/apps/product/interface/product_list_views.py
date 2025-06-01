@@ -15,12 +15,24 @@ class ProductListView(APIView):
         self.product_list_use_case = ProductListUseCase(ProductRepositoryImpl())
 
     def get(self, request):
-        products = self.product_list_use_case.execute()
+        try:
+            products = self.product_list_use_case.execute()
+        except Exception as e:
+            return Response(
+                {
+                    const.CODE: status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    const.MESSAGE: str(e),
+                    const.DATA: {},
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
         if not products:
             return Response(
                 {
                     const.CODE: status.HTTP_404_NOT_FOUND,
                     const.MESSAGE: "No products found.",
+                    const.DATA: {}
                 },
                 status=status.HTTP_404_NOT_FOUND,
             )

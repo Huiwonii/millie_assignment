@@ -34,7 +34,7 @@ class ProductDetailView(APIView):
                 {
                     "code": 404,
                     "message": str(e),
-                    "data": None,
+                    "data": {},
                 },
                 status=status.HTTP_404_NOT_FOUND,
             )

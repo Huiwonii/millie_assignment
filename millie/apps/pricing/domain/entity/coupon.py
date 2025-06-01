@@ -18,7 +18,7 @@ class Coupon:
     name: str
     discount_policy: DiscountPolicy
     valid_until: datetime
-    status: str
+    status: CouponStatus
     created_at: datetime
     updated_at: datetime
     target_type: TargetType
