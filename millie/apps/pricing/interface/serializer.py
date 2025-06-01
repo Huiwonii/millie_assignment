@@ -35,5 +35,4 @@ class PriceResultSerializer(serializers.Serializer):
     original = serializers.DecimalField(max_digits=10, decimal_places=2)
     discounted = serializers.DecimalField(max_digits=10, decimal_places=2)
     discount_amount = serializers.DecimalField(max_digits=10, decimal_places=2)
-    # discount_type은 “마지막 적용한 할인 유형”이라면 source="discount_type" 으로 노출 가능
     discount_type = serializers.CharField()

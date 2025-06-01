@@ -6,8 +6,7 @@
       "code": "BOOK001",
       "name": "테스트 도서 1",
       "price": "21000.00",
-      "discount_rate": "0.05",
-      "status": "SOLD_OUT",
+      "status": "ACTIVE",
       "created_at": "2025-05-29T15:49:02Z",
       "updated_at": "2025-05-29T15:49:02Z"
     }
@@ -65,8 +64,7 @@
       "code": "BOOK002",
       "name": "테스트 도서 2",
       "price": "22000.00",
-      "discount_rate": "0.10",
-      "status": "DISCONTINUED",
+      "status": "ACTIVE",
       "created_at": "2025-05-29T15:49:02Z",
       "updated_at": "2025-05-29T15:49:02Z"
     }
@@ -124,7 +122,6 @@
       "code": "BOOK003",
       "name": "테스트 도서 3",
       "price": "23000.00",
-      "discount_rate": "0.15",
       "status": "ACTIVE",
       "created_at": "2025-05-29T15:49:02Z",
       "updated_at": "2025-05-29T15:49:02Z"
@@ -183,7 +180,6 @@
       "code": "BOOK004",
       "name": "테스트 도서 4",
       "price": "24000.00",
-      "discount_rate": "0.20",
       "status": "SOLD_OUT",
       "created_at": "2025-05-29T15:49:02Z",
       "updated_at": "2025-05-29T15:49:02Z"
@@ -242,7 +238,6 @@
       "code": "BOOK005",
       "name": "테스트 도서 5",
       "price": "25000.00",
-      "discount_rate": "0.00",
       "status": "DISCONTINUED",
       "created_at": "2025-05-29T15:49:02Z",
       "updated_at": "2025-05-29T15:49:02Z"
@@ -301,7 +296,6 @@
       "code": "BOOK006",
       "name": "테스트 도서 6",
       "price": "26000.00",
-      "discount_rate": "0.05",
       "status": "ACTIVE",
       "created_at": "2025-05-29T15:49:02Z",
       "updated_at": "2025-05-29T15:49:02Z"
@@ -360,7 +354,6 @@
       "code": "BOOK007",
       "name": "테스트 도서 7",
       "price": "27000.00",
-      "discount_rate": "0.10",
       "status": "SOLD_OUT",
       "created_at": "2025-05-29T15:49:02Z",
       "updated_at": "2025-05-29T15:49:02Z"
@@ -419,7 +412,6 @@
       "code": "BOOK008",
       "name": "테스트 도서 8",
       "price": "28000.00",
-      "discount_rate": "0.15",
       "status": "DISCONTINUED",
       "created_at": "2025-05-29T15:49:02Z",
       "updated_at": "2025-05-29T15:49:02Z"
@@ -478,7 +470,6 @@
       "code": "BOOK009",
       "name": "테스트 도서 9",
       "price": "29000.00",
-      "discount_rate": "0.20",
       "status": "ACTIVE",
       "created_at": "2025-05-29T15:49:02Z",
       "updated_at": "2025-05-29T15:49:02Z"
@@ -537,7 +528,6 @@
       "code": "BOOK010",
       "name": "테스트 도서 10",
       "price": "30000.00",
-      "discount_rate": "0.00",
       "status": "SOLD_OUT",
       "created_at": "2025-05-29T15:49:02Z",
       "updated_at": "2025-05-29T15:49:02Z"

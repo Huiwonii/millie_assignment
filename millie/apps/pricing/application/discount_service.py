@@ -40,10 +40,6 @@ class DiscountService:
             target_product_code=product_code,
             target_user_id=user.id if user else None,
         )
-        print("G" * 100)
-        print(strategy_list)
-        print(len(strategy_list))
-        print("G" * 100)
         if not strategy_list:
             # 적용할 정책이 없으면 그대로 PriceResult를 리턴 (할인 없음)
             return PriceResult(

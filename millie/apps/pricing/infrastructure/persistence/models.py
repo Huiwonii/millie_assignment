@@ -35,7 +35,7 @@ class DiscountPolicy(models.Model):
 class DiscountTarget(models.Model):
     id = models.UUIDField(primary_key=True, default=UUID, editable=False)
     discount_policy = models.ForeignKey(DiscountPolicy, null=False, on_delete=models.CASCADE, db_comment="할인 정책")
-    target_user_id = models.ForeignKey("User", to_field="id", null=True, on_delete=models.CASCADE, db_comment="사용자에 적용되는 경우 값 있음")
+    target_user = models.ForeignKey("User", to_field="id", null=True, on_delete=models.CASCADE, db_comment="사용자에 적용되는 경우 값 있음")
     target_product_code = models.ForeignKey(Book, to_field="code", null=True, on_delete=models.CASCADE, db_comment="상품에 적용되는 경우 값 있음")
     apply_priority = models.IntegerField(null=False, db_comment="적용 우선순위")
     created_at = models.DateTimeField(auto_now_add=True, null=False)
@@ -69,7 +69,6 @@ class User(models.Model):
     """
     id = models.UUIDField(primary_key=True, default=UUID, editable=False)
     name = models.CharField(max_length=255, null=False, db_comment="사용자 이름")
-
     ...
 
     class Meta:

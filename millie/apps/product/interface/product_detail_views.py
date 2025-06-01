@@ -36,46 +36,37 @@ class ProductDetailView(APIView):
           }
         }
         """
-        # 1) query params
         coupon_code = request.query_params.get("coupon_code", None)
         user = request.user if request.user.is_authenticated else None
 
-        # try:
-        product_entity, coupon_list, price_result = self.use_case.execute(
-            code=code,
-            user=user,
-            coupon_code=coupon_code,
-        )
-        print("A" * 100)
-        print(coupon_list)
-        print("A" * 100)
-        # except Exception as e:
-        #     return Response(
-        #         {
-        #             "code": 404,
-        #             "message": str(e),
-        #             "data": None,
-        #         },
-        #         status=status.HTTP_404_NOT_FOUND,
-        #     )
+        try:
+            product_entity, coupon_list, price_result = self.use_case.execute(
+                code=code,
+                user=user,
+                coupon_code=coupon_code,
+            )
+        except Exception as e:
+            return Response(
+                {
+                    "code": 404,
+                    "message": str(e),
+                    "data": None,
+                },
+                status=status.HTTP_404_NOT_FOUND,
+            )
 
-        print("B" * 100)
-        print(coupon_list)
-        print("B" * 100)
 
-        # 2) 직렬화
         serialized_product = ProductSerializer(product_entity).data
         serialized_coupons = CouponSummarySerializer(coupon_list, many=True).data
         serialized_price_result = PriceResultSerializer(price_result).data
 
-        # 3) 합쳐서 응답
         return Response(
             {
                 "code": 200,
                 "message": "OK",
                 "data": {
                     "product": serialized_product,
-                    "available_coupons": serialized_coupons,
+                    "available_discounts": serialized_coupons,
                     "price_result": serialized_price_result,
                 },
             },

@@ -1,7 +1,5 @@
 from decimal import Decimal
 
-
-
 class PriceResult:
     def __init__(
         self,

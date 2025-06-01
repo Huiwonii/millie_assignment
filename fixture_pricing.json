@@ -18,7 +18,7 @@
     "model": "pricing.discountpolicy",
     "pk": "1a1a4b8f-d3a1-4afc-8d11-c97d592d6055",
     "fields": {
-      "discount_type": "fixed",
+      "discount_type": "FIXED",
       "value": "5000.00",
       "target_type": "PRODUCT",
       "is_active": true,
@@ -33,7 +33,7 @@
     "model": "pricing.discountpolicy",
     "pk": "4520ec18-505d-43b5-941f-9062ee13887b",
     "fields": {
-      "discount_type": "percentage",
+      "discount_type": "PERCENTAGE",
       "value": "0.20",
       "target_type": "ALL",
       "is_active": true,
@@ -48,7 +48,7 @@
     "model": "pricing.discountpolicy",
     "pk": "800e0670-cbbc-4bfc-a30d-db569e8ebc79",
     "fields": {
-      "discount_type": "fixed",
+      "discount_type": "FIXED",
       "value": "3000.00",
       "target_type": "PRODUCT",
       "is_active": true,

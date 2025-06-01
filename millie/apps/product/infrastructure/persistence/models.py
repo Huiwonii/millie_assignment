@@ -11,7 +11,6 @@ class Book(models.Model):
     code = models.CharField(max_length=255, unique=True, null=False, db_comment="상품 코드")
     name = models.CharField(max_length=255, null=False, db_comment="상품명")
     price = models.DecimalField(max_digits=10, decimal_places=2, null=False, db_comment="가격")
-    discount_rate = models.DecimalField(max_digits=10, decimal_places=2, null=False, db_comment="할인율")
     status = models.CharField(max_length=255, choices=ProductStatus.choices(),null=False, db_comment="판매 상태")
     created_at = models.DateTimeField(auto_now_add=True, null=False, db_comment="등록 일자")
     updated_at = models.DateTimeField(auto_now=True, db_comment="수정 일자")

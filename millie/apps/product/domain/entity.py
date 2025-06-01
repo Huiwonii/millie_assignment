@@ -17,7 +17,6 @@ class Product:  # aggregate root
     code: str
     name: str
     price: int
-    discount_rate: Decimal
     status: ProductStatus
     created_at: datetime
     updated_at: datetime
@@ -25,12 +24,6 @@ class Product:  # aggregate root
     feature: Optional[BookFeature] = None
     publish_info: Optional[PublishInfo] = None
     author: Optional[Author] = None
-
-    @property
-    def discount_price(self) -> Decimal:
-        if self.discount_rate is None:
-            return self.price
-        return self.price * (Decimal("1.0") - self.discount_rate)
 
     def __post_init__(self):
         if self.status == ProductStatus.ACTIVE and not self.detail:

@@ -123,29 +123,25 @@ class DiscountPolicyRepoImpl(DiscountPolicyRepository):
 
         now = timezone.now()
 
-        # ──────────────────────────────────────────────────────────────
-        # ① PRODUCT 전용 할인 조건
+        # PRODUCT 전용 할인 조건
         q_product = Q(target_product_code=target_product_code)
 
-        # ② USER 전용 할인 조건 (user_id가 전달됐을 때만 OR에 추가)
+        # USER 전용 할인 조건 (user_id가 전달됐을 때만 OR에 추가)
         q_user = Q()
         if target_user_id:
             q_user = Q(target_user_id=target_user_id)
 
-        # ③ ALL 대상 할인 조건:
-        #    → DiscountTarget.target_product_code IS NULL
-        #    → DiscountPolicy.target_type == TargetType.ALL.value
+        # 전체 할인:
         q_all = Q(
             target_product_code__isnull=True,
             discount_policy__target_type=TargetType.ALL.value,
         )
 
-        # ①②③ 을 OR 로 결합
+        # 필터 조건을 OR 로 결합
         combined_q = q_product | q_all
         if target_user_id:
             combined_q = combined_q | q_user
 
-        # ──────────────────────────────────────────────────────────────
         # DiscountTarget 테이블에서 필터 후 우선순위 순으로 정렬
         discount_targets = (
             DiscountTargetModel.objects
@@ -154,15 +150,13 @@ class DiscountPolicyRepoImpl(DiscountPolicyRepository):
         )
 
         policies: List[DiscountPolicy] = []
-
         for dt in discount_targets:
             policy_model = dt.discount_policy
-            # 정책 유효성 체크: is_active 및 기간 확인
+            # 정책 유효성 체크
             if not (policy_model and policy_model.is_active and
                     policy_model.effective_start_at <= now <= policy_model.effective_end_at):
                 continue
 
-            # 도메인 DiscountPolicy 객체로 변환 (우선순위도 함께 전달)
             if policy_model.discount_type == DiscountType.PERCENTAGE.value:
                 policies.append(PercentageDiscountPolicy(
                     discount_type=policy_model.discount_type,
@@ -173,4 +167,5 @@ class DiscountPolicyRepoImpl(DiscountPolicyRepository):
                     discount_type=policy_model.discount_type,
                     discount_amount=policy_model.value,
                 ))
+
         return policies
