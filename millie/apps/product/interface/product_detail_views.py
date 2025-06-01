@@ -4,43 +4,27 @@ from rest_framework import status
 
 from apps.product.application.product_detail_use_case import ProductDetailUseCase
 from apps.product.infrastructure.persistence.repository_impl import ProductRepositoryImpl
-from apps.pricing.application.discount_service import DiscountService, CouponService
+from apps.pricing.infrastructure.persistence.repository_impl import DiscountPolicyRepoImpl
+from apps.pricing.application.discount_service import DiscountService
+from apps.pricing.application.coupon_service import CouponService
 from apps.product.interface.serializer import ProductSerializer
 from apps.pricing.interface.serializer import CouponSummarySerializer, PriceResultSerializer
 
 
 class ProductDetailView(APIView):
     def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.product_repo = ProductRepositoryImpl()
-        self.discount_service = DiscountService()
-        self.coupon_service = CouponService()
-        self.use_case = ProductDetailUseCase(
-            product_repo=self.product_repo,
-            discount_service=self.discount_service,
-            coupon_service=self.coupon_service,
+        self._use_case = ProductDetailUseCase(
+            product_repo=ProductRepositoryImpl(),
+            discount_service=DiscountService(DiscountPolicyRepoImpl()),
+            coupon_service=CouponService(DiscountPolicyRepoImpl()),
         )
 
     def get(self, request, code: str):
-        """
-        GET /api/v1/products/{code}?coupon_code=XYZ
-
-        Response format:
-        {
-          "code": 200,
-          "message": "OK",
-          "data": {
-             "product": { ... },
-             "available_coupons": [ {...}, {...} ],
-             "price_result": { ... }
-          }
-        }
-        """
-        coupon_code = request.query_params.get("coupon_code", None)
+        coupon_code = request.query_params.getlist("coupon_code", [])
         user = request.user if request.user.is_authenticated else None
 
         try:
-            product_entity, coupon_list, price_result = self.use_case.execute(
+            product_entity, coupon_list, price_result = self._use_case.execute(
                 code=code,
                 user=user,
                 coupon_code=coupon_code,
