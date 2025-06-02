@@ -25,6 +25,22 @@
 
 ---
 
+## 환경세팅
+```shell
+
+1. docker-compose up -d 
+
+2. requirements.txt에 설치된 패키지 설치
+
+3. python manage.py migrate                        # manage.py는 millie/에 있습니다.
+
+4. python manage.py loaddata fixture_books.json    # 테스트용 리소스 db 로드
+   python manage.py loaddata fixture_pricing.json
+
+5. python manage.py runserver
+
+```
+
 ## 프로젝트 소개
 **프로젝트명**: RESTful 쇼핑몰 상품 관리 API  
 **목표**:  
