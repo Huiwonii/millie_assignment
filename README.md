@@ -1,4 +1,4 @@
-# RESTful 쇼핑몰 상품 관리 API
+# 과제: RESTful 쇼핑몰 상품 관리 API
 
 ## 목차
 1. [프로젝트 소개](#프로젝트-소개)  
@@ -128,7 +128,6 @@ millie_backend/                                 # 프로젝트 루트
 
 ## API 문서
 https://documenter.getpostman.com/view/36939512/2sB2qgey99
-
 
 ---
 
@@ -336,4 +335,5 @@ https://documenter.getpostman.com/view/36939512/2sB2qgey99
   }
 }
 
-4. 재사용성 관점에서 
+
+
