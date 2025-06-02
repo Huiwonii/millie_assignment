@@ -50,7 +50,6 @@ class Coupon(models.Model):
     id = models.UUIDField(primary_key=True, default=UUID, editable=False)
     code = models.CharField(max_length=255, null=False, db_comment="쿠폰 코드")
     name = models.CharField(max_length=255, null=False, db_comment="쿠폰 이름")
-    # way_to_issue = models.CharField(max_length=255, null=False, db_comment="발급 방식") # TODO! 삭제검토
     valid_until = models.DateTimeField(null=False, db_comment="유효 기간")
     status = models.CharField(max_length=255, null=False, db_comment="사용 상태")
     discount_policy = models.ForeignKey(DiscountPolicy, null=False, on_delete=models.CASCADE, db_comment="할인 정책")

@@ -24,8 +24,10 @@ class ConditionalDiscountPolicy(DiscountPolicy):
         product_code: Optional[str] = None,
         user_id: Optional[UUID] = None,
     ) -> PriceResult:
+
         if all(cond.is_satisfied(price, product_code, user_id) for cond in self._conditions):
             return self._base_policy.apply(price)
+
         else:
             return PriceResult(
                 original=price,

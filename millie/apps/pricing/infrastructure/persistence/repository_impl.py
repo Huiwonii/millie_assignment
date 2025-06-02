@@ -36,17 +36,13 @@ class DiscountPolicyRepoImpl(DiscountPolicyRepository):
         self.coupon_mapper = CouponMapper()
         self.discount_policy_mapper = DiscountPolicyMapper()
 
-    def get_coupon_by_code(
+    def get_coupons_by_code(
         self,
-        coupon_code: str,
+        coupon_code: List[str],
     ) -> Optional[CouponEntity]:
 
-        coupon = CouponModel.objects.get(code=coupon_code)
-
-        now = timezone.now()
-        if coupon and coupon.valid_until >= now:
-            return self.coupon_mapper.to_domain(coupon)
-        return None
+        coupons = CouponModel.objects.filter(code__in=coupon_code)
+        return [self.coupon_mapper.to_domain(c) for c in coupons if c.valid_until >= timezone.now()]
 
 
     # def get_discount_policies(

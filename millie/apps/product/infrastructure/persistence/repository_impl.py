@@ -4,15 +4,16 @@ from typing import (
 )
 from apps.product.domain.repository import ProductRepository
 from apps.product.domain.entity import Product as ProductDomainEntity
+from apps.product.domain.value_objects import ProductStatus
 from apps.product.infrastructure.persistence.models import Book as BookModel
 from apps.product.infrastructure.persistence.mapper import ProductMapper
+
 
 class ProductRepositoryImpl(ProductRepository):
 
     def __init__(self):
         self.mapper = ProductMapper()
 
-    # TODO! 필터를 위한 파라메트를 이런식으로 넘기는게 맞는지 고민할것
     def get_products(
         self,
         code: Optional[str] = None,
@@ -31,7 +32,7 @@ class ProductRepositoryImpl(ProductRepository):
         if name:
             qs = qs.filter(name=name)
 
-        qs = qs.filter(status="ACTIVE") # TODO! 아것도 비즈니스 룰인지 아니면 단순히 orm의 영역인지 고민
+        qs = qs.filter(status=ProductStatus.ACTIVE.value)
 
         return [self.mapper.to_domain(book) for book in qs]
 
@@ -51,4 +52,4 @@ class ProductRepositoryImpl(ProductRepository):
         if not qs.exists():
             raise BookModel.DoesNotExist(f"Product with code {code} not found")
 
-        return self.mapper.to_domain(qs.first()) # TODO! 확인
+        return self.mapper.to_domain(qs.first())

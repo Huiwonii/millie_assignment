@@ -27,7 +27,7 @@ class Product:  # aggregate root
 
     def __post_init__(self):
         if self.status == ProductStatus.ACTIVE and not self.detail:
-            raise ValueError  # TODO! 커스텀 에러 처리 화면에 보이는 활성상품의 경우 detail 정보 포함해야함
+            raise ValueError
 
 
 @dataclass(frozen=True)

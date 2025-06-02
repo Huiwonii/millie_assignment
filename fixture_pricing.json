@@ -102,7 +102,7 @@
       "code": "COUPON01",
       "name": "테스트 쿠폰 1",
       "valid_until": "2025-12-31T23:59:59Z",
-      "status": "active",
+      "status": "ACTIVE",
       "discount_policy": "0bae76ec-7230-41c1-9297-3461bd8aa115",
       "created_at": "2025-05-31T15:21:46.855469Z",
       "updated_at": "2025-05-31T15:21:46.855469Z"
@@ -115,7 +115,7 @@
       "code": "COUPON02",
       "name": "테스트 쿠폰 2",
       "valid_until": "2025-12-31T23:59:59Z",
-      "status": "active",
+      "status": "ACTIVE",
       "discount_policy": "1a1a4b8f-d3a1-4afc-8d11-c97d592d6055",
       "created_at": "2025-05-31T15:21:46.855469Z",
       "updated_at": "2025-05-31T15:21:46.855469Z"
@@ -128,7 +128,7 @@
       "code": "COUPON03",
       "name": "테스트 쿠폰 3",
       "valid_until": "2025-12-31T23:59:59Z",
-      "status": "active",
+      "status": "ACTIVE",
       "discount_policy": "4520ec18-505d-43b5-941f-9062ee13887b",
       "created_at": "2025-05-31T15:21:46.855469Z",
       "updated_at": "2025-05-31T15:21:46.855469Z"
