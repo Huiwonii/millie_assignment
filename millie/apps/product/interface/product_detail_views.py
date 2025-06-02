@@ -5,8 +5,9 @@ from apps.product.application.product_detail_use_case import ProductDetailUseCas
 from apps.product.infrastructure.persistence.repository_impl import ProductRepositoryImpl
 from apps.product.interface.serializer import ProductSerializer
 from apps.pricing.application.coupon_service import CouponService
-from apps.pricing.application.discount_service import DiscountService
-from apps.pricing.infrastructure.persistence.repository_impl import DiscountPolicyRepoImpl
+from apps.pricing.application.promotion_service import PromotionService
+from apps.pricing.infrastructure.persistence.repository_impl.coupon_repo_impl import CouponRepoImpl
+from apps.pricing.infrastructure.persistence.repository_impl.promotion_repo_impl import PromotionRepoImpl
 from apps.pricing.interface.serializer import (
     CouponSummarySerializer,
     PriceResultSerializer,
@@ -26,8 +27,8 @@ class ProductDetailView(APIView):
         super().__init__(**kwargs)
         self._use_case = ProductDetailUseCase(
             product_repo=ProductRepositoryImpl(),
-            discount_service=DiscountService(DiscountPolicyRepoImpl()),
-            coupon_service=CouponService(DiscountPolicyRepoImpl()),
+            promotion_service=PromotionService(PromotionRepoImpl()),
+            coupon_service=CouponService(CouponRepoImpl()),
         )
 
     def get(self, request, code: str):

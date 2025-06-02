@@ -10,19 +10,9 @@ from typing import (
 from uuid import UUID
 
 from apps.pricing.domain.entity.coupon import Coupon
-from apps.pricing.domain.policy.discount_policy import DiscountPolicy
 
 
-class DiscountPolicyRepository(ABC):
-
-    @abstractmethod
-    def get_discount_policies(
-        self,
-        target_product_code: str,
-        user_id: Optional[UUID] = None,
-    ) -> Optional[List[DiscountPolicy]]:
-        pass
-
+class CouponRepository(ABC):
 
     @abstractmethod
     def get_coupons_by_code(

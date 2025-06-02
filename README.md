@@ -76,74 +76,57 @@
 ## 폴더 구조
 
 ```plaintext 
-millie_backend/                                 # 프로젝트 루트
-├── manage.py 
-├── pytest.ini
-├── requirements.txt
-├── docker-compose.yml
-├── apps/
-│ ├── utils/                                    # 공통 상수 및 유틸리티 모듈
-│ │ └── const.py
-│ │
-│ ├── product/                                  # 상품 도메인 컨텍스트
-│ │ ├── interface/                              # API 레이어 (Controller + Serializer)
-│ │ │ ├── product_list_views.py
-│ │ │ ├── product_detail_views.py
-│ │ │ └── serializer.py
-│ │ │ └── tests/                                # end-point 테스트 코드
-│ │ │ └── test_product_list_api.py              # 상품 리스트 조회
-│ │ │ └── test_product_detail_api.py            # 상품 상세 조회
-│ │ │
-│ │ │
-│ │ ├── application/                            # 유스케이스(Use Case) 계층
-│ │ │ ├── product_list_use_case.py
-│ │ │ ├── product_detail_use_case.py
-│ │ │ └── tests/                                # 비즈니스 로직 중심 테스트 코드
-│ │ │ └── test_product_detail_use_case.py
-│ │ │
-│ │ ├── domain/                                 # 도메인 계층 (Entity, Value Object, Repository Interface, DTO 등)
-│ │ │ ├── entity.py
-│ │ │ ├── value_objects.py
-│ │ │ ├── dto.py
-│ │ │ └── repository.py
-│ │ │
-│ │ └── infrastructure/                         # 인프라 계층 (DB 모델, Repository 구현, Mapper)
-│ │ └── persistence/
-│ │ ├── models.py
-│ │ ├── mapper.py
-│ │ └── repository_impl.py
-│ │
-│ └── pricing/                                  # 가격(할인·쿠폰) 도메인 컨텍스트
-│ ├── interface/                                # API Layer (Serializer)
-│ │ └── serializer.py
-│ │
-│ ├── application/                              # 유스케이스(서비스) 계층
-│ │ ├── discount_service.py
-│ │ └── coupon_service.py
-│ │
-│ ├── domain/                                   # 도메인 계층 (Entity, Value Object, Policy, Repository Interface 등)
-│ │ ├── entity/
-│ │ │ ├── coupon.py
-│ │ │ └── price_result.py
-│ │ ├── value_objects.py
-│ │ ├── repository.py
-│ │ └── policy/                                 # 할인 정책 인터페이스 및 구현
-│ │ ├── discount_policy.py
-│ │ ├── condition.py
-│ │ └── conditional_policy.py
-│ │
-│ └── infrastructure/                           # 인프라 계층 (DB 모델, Repository 구현, Mapper)
-│ └── persistence/
-│ ├── models.py
-│ ├── mapper.py
-│ └── repository_impl.py
-│
-├── config/                                     # Django 설정 및 URL 라우팅
-  ├── settings.py
-  ├── urls.py
-  ├── wsgi.py
-  └── asgi.py
-
+  millie_backend/
+  ├── apps/
+  │   ├── product/
+  │   │   ├── application/
+  │   │   │   ├── product_list_use_case.py
+  │   │   │   ├── product_detail_use_case.py
+  │   │   │   └── tests/
+  │   │   ├── domain/
+  │   │   │   ├── entity.py
+  │   │   │   ├── value_objects.py
+  │   │   │   ├── dto.py
+  │   │   │   └── repository.py
+  │   │   └── infrastructure/
+  │   │       └── persistence/
+  │   │           ├── models.py
+  │   │           ├── mapper.py
+  │   │           └── repository_impl.py
+  │   ├── pricing/
+  │   │   ├── application/
+  │   │   │   ├── coupon_service.py
+  │   │   │   ├── discount_service.py
+  │   │   │   └── promotion_service.py
+  │   │   ├── domain/
+  │   │   │   ├── entity/
+  │   │   │   │   ├── coupon.py
+  │   │   │   │   └── price_result.py
+  │   │   │   ├── policy/
+  │   │   │   │   ├── discount_policy.py
+  │   │   │   │   ├── fixed_discount_policy.py
+  │   │   │   │   ├── percentage_discount_policy.py
+  │   │   │   │   └── conditional_policy.py
+  │   │   │   ├── repository.py
+  │   │   │   └── value_objects.py
+  │   │   └── infrastructure/
+  │   │       └── persistence/
+  │   │           ├── models.py
+  │   │           ├── mapper.py
+  │   │           └── repository_impl.py
+  │   └── utils/
+  │       └── const.py
+  ├── config/
+  │   ├── settings.py
+  │   ├── urls.py
+  │   ├── wsgi.py
+  │   └── asgi.py
+  ├── docker-compose.yml
+  ├── fixture_books.json
+  ├── fixture_pricing.json
+  ├── manage.py
+  ├── pytest.ini
+  ├── requirements.txt
 ```
 
 
@@ -259,11 +242,11 @@ https://documenter.getpostman.com/view/36939512/2sB2qgey99
      - `DiscountType` (정액, 정률 구분)  
   3. **리포지토리 인터페이스(Repository Interface)**  
      - `DiscountPolicyRepository`: `get_discount_policies(target_product_code, target_user_id)`, `get_coupons_by_code(codes)` 등  
-     - `CouponRepository`(alias로 겹쳐 사용)  
+     - `CouponRepository`
+     - `PromotionRepository`
   4. **정책(Policy)**  
      - `DiscountPolicy` 추상 클래스 (인터페이스 역할)  
      - `PercentageDiscountPolicy`, `FixedDiscountPolicy` 등 구체 클래스  
-     - `Condition`, `ConditionalPolicy` 등 필요 시 추가 로직을 수행할 수 있는 설계  
 - **역할**:  
   - **가격 관련 핵심 규칙**(할인율 계산, 정액 할인 적용 등)을 순수 비즈니스 코드로 캡슐화  
   - 애플리케이션 서비스(`discount_service`, `coupon_service`)는 오직 이 인터페이스만 참조 → 구현체 독립성 확보
