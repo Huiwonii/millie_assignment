@@ -3,7 +3,9 @@ from datetime import datetime
 from decimal import Decimal
 from typing import Optional
 from uuid import UUID
+
 from django.utils import timezone
+
 from apps.pricing.domain.policy.discount_policy import DiscountPolicy
 from apps.pricing.domain.value_objects import (
     CouponStatus,
@@ -42,6 +44,7 @@ class Coupon:
 
     def is_available(self, user, product_code: str) -> bool:
         now = timezone.now()
+
         if self.status != CouponStatus.ACTIVE.value or self.valid_until < now:
             return False
 

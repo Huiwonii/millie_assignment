@@ -1,4 +1,5 @@
 from django.db import models
+
 from apps.product.domain.value_objects import (
     Feature,
     Category,

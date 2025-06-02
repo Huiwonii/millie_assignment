@@ -2,11 +2,14 @@ from typing import (
     List,
     Optional,
 )
+
+from apps.product.domain.entity import Product as ProductEntity
 from apps.product.domain.repository import ProductRepository
-from apps.product.domain.entity import Product as ProductDomainEntity
 from apps.product.domain.value_objects import ProductStatus
-from apps.product.infrastructure.persistence.models import Book as BookModel
 from apps.product.infrastructure.persistence.mapper import ProductMapper
+from apps.product.infrastructure.persistence.models import Book as BookModel
+
+from apps.utils.exceptions import NotFoundException
 
 
 class ProductRepositoryImpl(ProductRepository):
@@ -18,12 +21,11 @@ class ProductRepositoryImpl(ProductRepository):
         self,
         code: Optional[str] = None,
         name: Optional[str] = None,
-    ) -> List[ProductDomainEntity]:
+    ) -> List[ProductEntity]:
         qs = (
             BookModel.objects.select_related(
                 "detail", "author", "publish_info"
-            )
-            .prefetch_related("feature") # feature는 still ManyToOne
+            ).prefetch_related("feature")
             .all()
         )
         if code:
@@ -37,19 +39,9 @@ class ProductRepositoryImpl(ProductRepository):
         return [self.mapper.to_domain(book) for book in qs]
 
 
-    def get_product_by_code(
-        self,
-        code: str,
-    ) -> ProductDomainEntity:
-        qs = (
-            BookModel.objects.select_related(
-                "detail", "author", "publish_info"
-            )
-            .prefetch_related("feature")
-            .filter(code=code)
-        )
-
-        if not qs.exists():
-            raise BookModel.DoesNotExist(f"Product with code {code} not found")
-
-        return self.mapper.to_domain(qs.first())
+    def get_product_by_code(self, code: str) -> ProductEntity:
+        try:
+            book = BookModel.objects.get(code=code, status=ProductStatus.ACTIVE.value)
+        except BookModel.DoesNotExist:
+            raise NotFoundException(f"해당 코드({code})의 상품이 없거나 판매 불가 상태입니다.")
+        return self.mapper.to_domain(book)

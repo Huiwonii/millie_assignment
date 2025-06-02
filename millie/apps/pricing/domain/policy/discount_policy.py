@@ -1,11 +1,14 @@
-from abc import ABC, abstractmethod
+from abc import (
+    ABC,
+    abstractmethod,
+)
 from decimal import Decimal
-from apps.pricing.domain.entity.price_result import PriceResult
+from apps.pricing.domain.entity.price_result import PriceResult as PriceResultEntity
 
 
 class DiscountPolicy(ABC):
     @abstractmethod
-    def apply(self, price: Decimal) -> PriceResult:
+    def apply(self, price: Decimal) -> PriceResultEntity:
         pass
 
 
@@ -25,15 +28,15 @@ class PercentageDiscountPolicy(DiscountPolicy):
     def apply(
         self,
         original_price: Decimal,
-    ) -> PriceResult:
+    ) -> PriceResultEntity:
         discount_amount = (original_price * self._discount_rate)
         final_price = original_price - discount_amount
 
-        return PriceResult(
+        return PriceResultEntity(
             original=original_price,
             discounted=final_price,
             discount_amount=discount_amount,
-            discount_type=self._discount_type,
+            discount_types=[self._discount_type],
         )
 
     @property
@@ -61,16 +64,16 @@ class FixedDiscountPolicy(DiscountPolicy):
     def apply(
         self,
         original_price: Decimal,
-    ) -> PriceResult:
+    ) -> PriceResultEntity:
 
         discount_amount = min(self._discount_amount, original_price)
         final_price = original_price - discount_amount
 
-        return PriceResult(
+        return PriceResultEntity(
             original=original_price,
             discounted=final_price,
             discount_amount=discount_amount,
-            discount_type=self._discount_type,
+            discount_types=[self._discount_type],
         )
 
     @property

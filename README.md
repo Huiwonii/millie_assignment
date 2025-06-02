@@ -25,6 +25,22 @@
 
 ---
 
+## 환경세팅
+```shell
+
+1. docker-compose up -d 
+
+2. requirements.txt에 설치된 패키지 설치
+
+3. python manage.py migrate                        # manage.py는 millie/에 있습니다.
+
+4. python manage.py loaddata fixture_books.json    # 테스트용 리소스 db 로드
+   python manage.py loaddata fixture_pricing.json
+
+5. python manage.py runserver
+
+```
+
 ## 프로젝트 소개
 **프로젝트명**: RESTful 쇼핑몰 상품 관리 API  
 **목표**:  
@@ -59,6 +75,7 @@
 
 ## 폴더 구조
 
+```plaintext 
 millie_backend/                                 # 프로젝트 루트
 ├── manage.py 
 ├── pytest.ini
@@ -73,6 +90,10 @@ millie_backend/                                 # 프로젝트 루트
 │ │ │ ├── product_list_views.py
 │ │ │ ├── product_detail_views.py
 │ │ │ └── serializer.py
+│ │ │ └── tests/                                # end-point 테스트 코드
+│ │ │ └── test_product_list_api.py              # 상품 리스트 조회
+│ │ │ └── test_product_detail_api.py            # 상품 상세 조회
+│ │ │
 │ │ │
 │ │ ├── application/                            # 유스케이스(Use Case) 계층
 │ │ │ ├── product_list_use_case.py
@@ -106,23 +127,24 @@ millie_backend/                                 # 프로젝트 루트
 │ │ │ └── price_result.py
 │ │ ├── value_objects.py
 │ │ ├── repository.py
-│ │ └── policy/             # 할인 정책 인터페이스 및 구현
+│ │ └── policy/                                 # 할인 정책 인터페이스 및 구현
 │ │ ├── discount_policy.py
 │ │ ├── condition.py
 │ │ └── conditional_policy.py
 │ │
-│ └── infrastructure/ # 인프라 계층 (DB 모델, Repository 구현, Mapper)
+│ └── infrastructure/                           # 인프라 계층 (DB 모델, Repository 구현, Mapper)
 │ └── persistence/
 │ ├── models.py
 │ ├── mapper.py
 │ └── repository_impl.py
 │
-├── config/ # Django 설정 및 URL 라우팅
+├── config/                                     # Django 설정 및 URL 라우팅
   ├── settings.py
   ├── urls.py
   ├── wsgi.py
   └── asgi.py
 
+```
 
 
 ## API 문서
@@ -389,10 +411,60 @@ https://documenter.getpostman.com/view/36939512/2sB2qgey99
                 "original": "21000.00",
                 "discounted": "18900.00",
                 "discount_amount": "2100.00",
-                "discount_type": "PERCENTAGE"
+                "discount_type": [
+                  "PERCENTAGE",
+                ],
             }
         }
     }
 ```
 
 
+
+### 테스트 시나리오 및 결과
+```plaintext
+
+[도메인 레이어(비즈니스 로직)테스트]
+
+test_만료된_쿠폰적용시도 (apps.product.application.tests.test_product_detail_use_case.ProductDetailUseCaseTest) ... ok
+test_사용자대상불일치_쿠폰적용시도 (apps.product.application.tests.test_product_detail_use_case.ProductDetailUseCaseTest) ... ok
+test_사용할_수_없는_상태의_쿠폰적용시도 (apps.product.application.tests.test_product_detail_use_case.ProductDetailUseCaseTest) ... ok
+test_상품대상불일치_쿠폰적용시도 (apps.product.application.tests.test_product_detail_use_case.ProductDetailUseCaseTest) ... ok
+test_없는_쿠폰적용시도 (apps.product.application.tests.test_product_detail_use_case.ProductDetailUseCaseTest) ... ok
+test_음수_최종가격_방어 (apps.product.application.tests.test_product_detail_use_case.ProductDetailUseCaseTest) ... ok
+test_중복_쿠폰코드_적용시도 (apps.product.application.tests.test_product_detail_use_case.ProductDetailUseCaseTest) ... ok
+test_최소적용금액_경계값_쿠폰적용 (apps.product.application.tests.test_product_detail_use_case.ProductDetailUseCaseTest) ... ok
+test_최소적용금액_안되는상품에_쿠폰적용시도 (apps.product.application.tests.test_product_detail_use_case.ProductDetailUseCaseTest) ... ok
+test_쿠폰순서에_따른_할인차이 (apps.product.application.tests.test_product_detail_use_case.ProductDetailUseCaseTest) ... ok
+test_쿠폰없으면_정가반환 (apps.product.application.tests.test_product_detail_use_case.ProductDetailUseCaseTest) ... ok
+test_쿠폰여러개_누적적용시_우선순위에_따라_할인 (apps.product.application.tests.test_product_detail_use_case.ProductDetailUseCaseTest) ... ok
+test_쿠폰한개적용시_할인 (apps.product.application.tests.test_product_detail_use_case.ProductDetailUseCaseTest) ... ok
+test_할인서비스_예외발생 (apps.product.application.tests.test_product_detail_use_case.ProductDetailUseCaseTest) ... ok
+
+
+
+[인터페이스 레이어 테스트 - 상품 리스트조회]
+test_empty_product_list (apps.product.interface.tests.test_product_list_api.ProductListAPITest)
+데이터베이스에 ACTIVE 상태 상품이 하나도 없을 때, ... ok
+test_product_list_returns_active_products (apps.product.interface.tests.test_product_list_api.ProductListAPITest)
+GET /api/v1/products 호출 시, ... ok
+
+
+
+
+[인터페이스 레이어 테스트 - 상품 상세조회]
+test_product_detail_coupon_minimum_amount (apps.product.interface.tests.test_product_detail_api.ProductDetailAPITest)
+쿠폰 최소 구매 금액 조건 검사: ... ok
+test_product_detail_inactive (apps.product.interface.tests.test_product_detail_api.ProductDetailAPITest)
+INACTIVE 상태의 상품 조회 → 404 Not Found ... ok
+test_product_detail_not_found (apps.product.interface.tests.test_product_detail_api.ProductDetailAPITest)
+존재하지 않는 상품 코드 조회 → NotFoundError로 404 Not Found ... ok
+test_product_detail_with_invalid_coupon_code (apps.product.interface.tests.test_product_detail_api.ProductDetailAPITest)
+ACTIVE 상품에 잘못된 coupon_code 넘겨도 200 OK, ... ok
+test_product_detail_with_valid_coupon (apps.product.interface.tests.test_product_detail_api.ProductDetailAPITest)
+ACTIVE 상품에 유효한 쿠폰 생성 후 coupon_code로 넘기면, ... ok
+test_product_detail_without_coupon (apps.product.interface.tests.test_product_detail_api.ProductDetailAPITest)
+ACTIVE 상태의 상품 조회, coupon_code 파라미터 없을 때 ... ok
+
+
+```

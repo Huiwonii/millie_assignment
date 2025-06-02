@@ -1,7 +1,7 @@
 from typing import List
 from uuid import UUID
 from apps.product.domain.repository import ProductRepository
-from apps.product.domain.entity import Product as ProductDomainEntity
+from apps.product.domain.entity import Product as ProductEntity
 
 
 class ProductListUseCase:
@@ -11,9 +11,10 @@ class ProductListUseCase:
     ) -> None:
         self.product_repo = product_repo
 
-    def execute(self) -> List[ProductDomainEntity]:
+    def execute(self) -> List[ProductEntity]:
         return self.product_repo.get_products()
 
     def validate(self) -> None:
+        # 로직이 복잡해지면 그에 따라 구현
         pass
 

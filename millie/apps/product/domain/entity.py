@@ -1,16 +1,15 @@
 from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
-from decimal import Decimal
-from typing import (
-    Optional,
-)
-from .value_objects import (
+from typing import Optional
+
+from apps.product.domain.value_objects import (
     Category,
     Feature,
     ProductStatus,
     VisibilityStatus,
 )
+
 
 @dataclass
 class Product:  # aggregate root
