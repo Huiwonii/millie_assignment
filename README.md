@@ -59,6 +59,7 @@
 
 ## 폴더 구조
 
+```plaintext 
 millie_backend/                                 # 프로젝트 루트
 ├── manage.py 
 ├── pytest.ini
@@ -106,23 +107,24 @@ millie_backend/                                 # 프로젝트 루트
 │ │ │ └── price_result.py
 │ │ ├── value_objects.py
 │ │ ├── repository.py
-│ │ └── policy/             # 할인 정책 인터페이스 및 구현
+│ │ └── policy/                                 # 할인 정책 인터페이스 및 구현
 │ │ ├── discount_policy.py
 │ │ ├── condition.py
 │ │ └── conditional_policy.py
 │ │
-│ └── infrastructure/ # 인프라 계층 (DB 모델, Repository 구현, Mapper)
+│ └── infrastructure/                           # 인프라 계층 (DB 모델, Repository 구현, Mapper)
 │ └── persistence/
 │ ├── models.py
 │ ├── mapper.py
 │ └── repository_impl.py
 │
-├── config/ # Django 설정 및 URL 라우팅
+├── config/                                     # Django 설정 및 URL 라우팅
   ├── settings.py
   ├── urls.py
   ├── wsgi.py
   └── asgi.py
 
+```
 
 
 ## API 문서
