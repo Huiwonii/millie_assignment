@@ -20,9 +20,8 @@
 5. [주요 기능](#주요-기능)  
    - [상품 리스트 조회](#상품-리스트-조회)  
    - [상품 상세 페이지: 가격 계산 로직](#상품-상세-페이지-가격-계산-로직)  
-6. [API 엔드포인트](#api-엔드포인트)  
-7. [실행 및 테스트 방법](#실행-및-테스트-방법)  
-8. [피드백 및 개선 사항](#피드백-및-개선-사항)  
+6. [API 문서](#API-문서)  
+
 
 ---
 
@@ -281,59 +280,119 @@ https://documenter.getpostman.com/view/36939512/2sB2qgey99
 3. **예시 응답**:
 ```json
     {
-    "code": 200,
-    "message": "OK.",
-    "data": [
-        {
-        "code": "BOOK001",
-        "name": "테스트 도서 1",
-        "price": 22000.00,
-        "status": "ACTIVE",
-        "author": "한희원1",
-        "publisher": "자바 출판사",
-        "features": ["베스트셀러", "재고 있음"]
-        },
-        {
-        "code": "BOOK002",
-        "name": "테스트 도서 2",
-        "price": 18000.00,
-        "status": "ACTIVE",
-        "author": "한희원2",
-        "publisher": "파이썬 출판사",
-        "features": ["할인 중", "주문 제작 가능"]
-        }
-    ]
+        "code": 200,
+        "message": "OK.",
+        "data": [
+            {
+                "code": "BOOK001",
+                "name": "테스트 도서 1",
+                "author": "저자 1",
+                "publisher": "출판사 1",
+                "published_date": "2023-01-01",
+                "price": "21000.00",
+                "created_at": "2025-05-29T15:49:02Z",
+                "updated_at": "2025-05-29T15:49:02Z"
+            },
+            {
+                "code": "BOOK002",
+                "name": "테스트 도서 2",
+                "author": "저자 2",
+                "publisher": "출판사 2",
+                "published_date": "2023-02-01",
+                "price": "22000.00",
+                "created_at": "2025-05-29T15:49:02Z",
+                "updated_at": "2025-05-29T15:49:02Z"
+            },
+            {
+                "code": "BOOK003",
+                "name": "테스트 도서 3",
+                "author": "저자 3",
+                "publisher": "출판사 3",
+                "published_date": "2023-03-01",
+                "price": "23000.00",
+                "created_at": "2025-05-29T15:49:02Z",
+                "updated_at": "2025-05-29T15:49:02Z"
+            },
+            {
+                "code": "BOOK006",
+                "name": "테스트 도서 6",
+                "author": "저자 6",
+                "publisher": "출판사 6",
+                "published_date": "2023-06-01",
+                "price": "26000.00",
+                "created_at": "2025-05-29T15:49:02Z",
+                "updated_at": "2025-05-29T15:49:02Z"
+            },
+            {
+                "code": "BOOK009",
+                "name": "테스트 도서 9",
+                "author": "저자 9",
+                "publisher": "출판사 9",
+                "published_date": "2023-09-01",
+                "price": "29000.00",
+                "created_at": "2025-05-29T15:49:02Z",
+                "updated_at": "2025-05-29T15:49:02Z"
+            }
+        ]
     }
+
 ```
 
 ### 상품 상세 페이지: 가격 계산 로직
 1. **HTTP 요청**: /api/v1/products/{code}?coupon_code=COUPON01&coupon_code=COUPON03
 
-2. **흐름**:  
- - `ProductDetailView`(interface)에서 {code}, coupon_code를 추출하여 `ProductDetailUseCase` 호출.
- - 상품 조회: `ProductRepositoryImpl.get_product_by_code(code)` → 도메인 `ProductEntity` 반환.
- - 할인:
-  - `DiscountService.apply_policy(user, product_code, base_price)` 호출
-  - `DiscountPolicyRepoImpl.get_discount_policies(...)` → 도메인 `DiscountPolicyStrategy 리스트` 반환
- - 전략을 골라 apply()
- - 쿠폰 적용:
-  - `CouponService.get_coupons_by_code([“COUPON01”, “COUPON05”])` → 도메인 `CouponDomainEntity 리스트` 반환
-  - 각 쿠폰마다 is_available(user, product_code) 확인
-  - `CouponDomainEntity.to_discount_policy()` 로 `DiscountPolicyStrategy` 생성 후, 현재 할인 가격에 apply()
- - 최종 PriceResult 계산 후 응답 serialize
+2. **흐름**:
+    - `ProductDetailView`(interface)에서 {code}, coupon_code를 추출하여 `ProductDetailUseCase` 호출.
+    - 상품 조회: `ProductRepositoryImpl.get_product_by_code(code)` → 도메인 `ProductEntity` 반환.
+    - 할인:
+        - `DiscountService.apply_policy(user, product_code, base_price)` 호출
+        - `DiscountPolicyRepoImpl.get_discount_policies(...)` → 도메인 `DiscountPolicyStrategy 리스트` 반환
+        - 전략을 골라 apply()
+    - 쿠폰 적용:
+        - `CouponService.get_coupons_by_code([“COUPON01”, “COUPON05”])` → 도메인 `CouponDomainEntity 리스트` 반환
+        - 각 쿠폰마다 is_available(user, product_code) 확인
+        - `CouponDomainEntity.to_discount_policy()` 로 `DiscountPolicyStrategy` 생성 후, 현재 할인 가격에 apply()
+    - 최종 PriceResult 계산 후 응답 serialize
 
 
 3. **예시 응답**:
 ```json
-{
-  "code": 200,
-  "message": "OK",
-  "data": {
-    "product": { /* serialize 상품 정보 */ },
-    "available_discounts": [ /* 사용 가능한 쿠폰 요약 정보 리스트 */ ],
-    "price_result": { /* 가격 계산 결과 */ }
-  }
-}
-
+    {
+        "code": 200,
+        "message": "OK",
+        "data": {
+            "product": {
+                "code": "BOOK001",
+                "name": "테스트 도서 1",
+                "author": "저자 1",
+                "publisher": "출판사 1",
+                "published_date": "2023-01-01",
+                "price": "21000.00",
+                "created_at": "2025-05-29T15:49:02Z",
+                "updated_at": "2025-05-29T15:49:02Z"
+            },
+            "available_discounts": [
+                {
+                    "code": "COUPON01",
+                    "name": "테스트 쿠폰 1",
+                    "discount_type": "PERCENTAGE",
+                    "discount_value": "0.10"
+                },
+                {
+                    "code": "COUPON03",
+                    "name": "테스트 쿠폰 3",
+                    "discount_type": "PERCENTAGE",
+                    "discount_value": "0.20"
+                }
+            ],
+            "price_result": {
+                "original": "21000.00",
+                "discounted": "18900.00",
+                "discount_amount": "2100.00",
+                "discount_type": "PERCENTAGE"
+            }
+        }
+    }
+```
 
 
