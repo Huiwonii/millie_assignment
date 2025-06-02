@@ -1,9 +1,5 @@
 from decimal import Decimal
-from typing import (
-    List,
-    Optional,
-    Tuple,
-)
+from typing import List, Optional, Tuple
 
 from apps.pricing.application.discount_service import DiscountService
 from apps.pricing.application.coupon_service import CouponService
@@ -18,7 +14,6 @@ from apps.utils.exceptions import NotFoundException
 
 
 class ProductDetailUseCase:
-
     def __init__(
         self,
         product_repo: ProductRepository,
@@ -29,79 +24,120 @@ class ProductDetailUseCase:
         self.discount_service = discount_service
         self.coupon_service = coupon_service
 
+    # TODO! execute 함수 코드 리팩토링 필요
     def execute(
         self,
         code: str,
         user=None,
-        coupon_code=None,
-    ):
-        product_entity = self.product_repo.get_product_by_code(code)
+        coupon_code: Optional[List[str]] = None,
+    ) -> Tuple[ProductEntity, List[CouponEntity], PriceResultEntity]:
+        """
+        1) 상품 조회 및 활성 상태 검증
+        2) 화면에 보여줄 “적용 가능 쿠폰” 필터링
+        3) coupon_code 가 없으면 원가 그대로 반환
+        4) coupon_code 가 있으면, 실제로 적용할 쿠폰만 골라서 누적 할인 계산
+        """
+        product = self._fetch_and_validate_product(code)
+        base_price = product.price
 
-        # 1) 상품 없거나 비활성 상태면 NotFoundError
-        if not product_entity or product_entity.status != ProductStatus.ACTIVE.value:
+        available_coupons = self._filter_available_coupons(product, user, base_price)
+
+        if not coupon_code:
+            return product, available_coupons, self._build_no_discount_result(base_price)
+
+        applied_codes = set(coupon_code)
+        return product, available_coupons, self._calculate_price_with_coupons(
+            product, user, base_price, available_coupons, applied_codes
+        )
+
+    # ──────────────────────────────────────────────────────────────────────────
+    # 상품 조회 및 활성 상태 검증
+    # ──────────────────────────────────────────────────────────────────────────
+    def _fetch_and_validate_product(self, code: str) -> ProductEntity:
+        try:
+            product = self.product_repo.get_product_by_code(code)
+        except Exception:
             raise NotFoundException(f"해당 코드({code})의 상품이 없거나 판매 불가 상태입니다.")
+        return product
 
-        base_price = product_entity.price
-
-        # 2) get_applicable_coupons(): 화면으로 보여줄 후보 전체
-        raw_applicable = self.coupon_service.get_applicable_coupons(
-            product_code=code,
+    # ──────────────────────────────────────────────────────────────────────────
+    # 화면에 보여줄 적용 가능 쿠폰 필터링
+    # ──────────────────────────────────────────────────────────────────────────
+    def _filter_available_coupons(
+        self,
+        product_entity: ProductEntity,
+        user,
+        base_price: Decimal,
+    ) -> List[CouponEntity]:
+        raw_list = self.coupon_service.get_applicable_coupons(
+            product_code=product_entity.code,
             user=user,
         ) or []
 
-        # 3) “최소 구매 금액”과 “is_available” 체크 → 실제 화면에 보여줄 final_applicable
-        final_applicable = []
-        for coupon in raw_applicable:
+        filtered: List[CouponEntity] = []
+        for coupon in raw_list:
             if base_price < coupon.minimum_purchase_amount:
-                # 최소 구매 금액 미달
                 continue
             if not coupon.is_available(user, product_entity.code):
-                # 유효성(만료, 상태, 타겟 등) 미충족
                 continue
-            final_applicable.append(coupon)
+            filtered.append(coupon)
 
-        # 4) 가격 계산 로직 (coupon_code가 들어온 경우에만 적용)
-        if not coupon_code:
-            # coupon_code가 없으면 가격 원가 그대로
-            price_result = PriceResultEntity(
-                original=base_price,
-                discounted=base_price,
-                discount_amount=Decimal("0.00"),
-                discount_types=[],
-            )
-            return product_entity, final_applicable, price_result
+        return filtered
 
-        # 5) coupon_code가 들어왔을 때, 실제 사용자가 쿼리 스트링으로 보낸 값과 final_applicable 을 매칭
-        # chosen_codes = set(coupon_code)
-        coupons_domain = self.coupon_service.get_coupons_by_code(coupon_code) or []
+    # ──────────────────────────────────────────────────────────────────────────
+    # coupon_code 가 없을 때 원가 그대로 PriceResult 생성
+    # ──────────────────────────────────────────────────────────────────────────
+    def _build_no_discount_result(self, base_price: Decimal) -> PriceResultEntity:
+        return PriceResultEntity(
+            original=base_price,
+            discounted=base_price,
+            discount_amount=Decimal("0.00"),
+            discount_types=[],
+        )
 
-        # 6) final_applicable 중 “최종 적용 가능한 쿠폰만” price 계산에 쓰기
+    # ──────────────────────────────────────────────────────────────────────────
+    # coupon_code 가 있을 때 실제 적용 쿠폰만 골라 누적 할인 계산
+    # ──────────────────────────────────────────────────────────────────────────
+    def _calculate_price_with_coupons(
+        self,
+        product_entity: ProductEntity,
+        user,
+        base_price: Decimal,
+        available_coupons: List[CouponEntity],
+        applied_codes: set,
+    ) -> PriceResultEntity:
+
+        allowed_code_set = {c.code for c in available_coupons}
+
+        coupons_to_apply = self.coupon_service.get_coupons_by_code(list(applied_codes)) or []
+
         final_price = base_price
         total_discount_amount = Decimal("0.00")
-        discount_types: List[str] = []
+        accumulated_types: List[str] = []
 
-        for coupon in coupons_domain:
-            # (a) screen-level 걸러낸 final_applicable 에 포함되어 있고
-            # (b) 실제 is_available(user, code)가 true 여야만
-            if coupon.code not in {c.code for c in final_applicable}:
+        for coupon in coupons_to_apply:
+            code = coupon.code
+
+            if code not in allowed_code_set:
                 continue
+
             if not coupon.is_available(user, product_entity.code):
                 continue
 
-            # (c) 할인을 누적 적용
-            policy = coupon.to_discount_policy()
+            # 할인금액 계산 부분 호출
+            policy: DiscountPolicy = coupon.to_discount_policy()
             result = policy.apply(final_price)
+
             total_discount_amount += (final_price - result.discounted)
             final_price = result.discounted
-            discount_types.extend(result.discount_types)
-            discount_types = list(set(discount_types))
 
-        price_result = PriceResultEntity(
+            accumulated_types.extend(result.discount_types)
+
+        unique_types = list(dict.fromkeys(accumulated_types))
+
+        return PriceResultEntity(
             original=base_price,
             discounted=final_price,
             discount_amount=total_discount_amount,
-            discount_types=discount_types,
+            discount_types=unique_types,
         )
-
-        return product_entity, final_applicable, price_result
-

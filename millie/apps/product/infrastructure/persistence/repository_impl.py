@@ -41,7 +41,7 @@ class ProductRepositoryImpl(ProductRepository):
 
     def get_product_by_code(self, code: str) -> ProductEntity:
         try:
-            book = BookModel.objects.get(code=code)
+            book = BookModel.objects.get(code=code, status=ProductStatus.ACTIVE.value)
         except BookModel.DoesNotExist:
             raise NotFoundException(f"해당 코드({code})의 상품이 없거나 판매 불가 상태입니다.")
         return self.mapper.to_domain(book)

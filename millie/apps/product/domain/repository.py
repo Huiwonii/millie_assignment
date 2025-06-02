@@ -16,7 +16,7 @@ class ProductRepository(ABC):
 
     @abstractmethod
     def get_product_by_code(
-        self, 
+        self,
         code: str
     ) -> Optional[Product]:
         pass

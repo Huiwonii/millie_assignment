@@ -15,5 +15,6 @@ class ProductListUseCase:
         return self.product_repo.get_products()
 
     def validate(self) -> None:
+        # 로직이 복잡해지면 그에 따라 구현
         pass
 
