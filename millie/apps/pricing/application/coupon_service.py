@@ -6,12 +6,12 @@ from typing import (
 from django.utils import timezone
 
 from apps.pricing.domain.entity.coupon import Coupon as CouponEntity
-from apps.pricing.domain.repository import DiscountPolicyRepository
+from apps.pricing.domain.repositories.coupon_repository import CouponRepository
 
 class CouponService:
     def __init__(
         self,
-        repo: DiscountPolicyRepository,
+        repo: CouponRepository,
     ):
         self._repo = repo
 

@@ -19,7 +19,7 @@ class CouponMapper:
         policy_model = coupon_model.discount_policy
         strategy = self.discount_policy_mapper.to_domain(policy_model)
 
-        dt_model = (
+        discount_target_model = (
             DiscountTargetModel.objects
             .filter(discount_policy=policy_model)
             .order_by("apply_priority")
@@ -28,11 +28,11 @@ class CouponMapper:
         target_product_code = None
         target_user_id = None
 
-        if dt_model:
-            if dt_model.target_product_code:
-                target_product_code = dt_model.target_product_code.code
-            if dt_model.target_user_id:
-                target_user_id = dt_model.target_user_id.id
+        if discount_target_model:
+            if discount_target_model.target_product_code:
+                target_product_code = discount_target_model.target_product_code.code
+            if discount_target_model.target_user_id:
+                target_user_id = discount_target_model.target_user_id.id
 
         return CouponEntity(id=coupon_model.id,
             code=coupon_model.code,
@@ -50,7 +50,9 @@ class CouponMapper:
         )
 
 
+
 class DiscountPolicyMapper:
+
     def to_domain(
         self,
         model: DiscountPolicyModel,

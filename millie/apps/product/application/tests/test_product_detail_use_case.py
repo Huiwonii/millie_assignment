@@ -8,6 +8,7 @@ from django.utils import timezone
 from apps.product.application.product_detail_use_case import ProductDetailUseCase
 from apps.product.domain.entity import Product as ProductEntity
 from apps.pricing.domain.entity.coupon import Coupon as CouponEntity
+from apps.pricing.domain.entity.price_result import PriceResult as PriceResultEntity
 from apps.pricing.domain.policy.discount_policy import (
     PercentageDiscountPolicy,
     FixedDiscountPolicy,
@@ -130,14 +131,20 @@ class ProductDetailUseCaseTest(TestCase):
 
     def test_쿠폰없으면_정가반환(self):
         mock_product_repo = mock.Mock(get_product_by_code=lambda code: self.product_entity_book2)
-        mock_discount_service = mock.Mock()
+        mock_promotion_service = mock.Mock()
+        mock_promotion_service.apply_policy.side_effect = lambda product_code, original_price, user=None: PriceResultEntity(
+            original=original_price,
+            discounted=original_price,
+            discount_amount=Decimal("0.00"),
+            discount_types=[]
+        )
         mock_coupon_service = mock.Mock(
             get_applicable_coupons=lambda **kwargs: [],
             get_coupons_by_code=lambda codes: [],
         )
         use_case = ProductDetailUseCase(
             product_repo=mock_product_repo,
-            discount_service=mock_discount_service,
+            promotion_service=mock_promotion_service,
             coupon_service=mock_coupon_service,
         )
         _, _, price_result = use_case.execute(
@@ -149,14 +156,20 @@ class ProductDetailUseCaseTest(TestCase):
 
     def test_쿠폰한개적용시_할인(self):
         mock_product_repo = mock.Mock(get_product_by_code=lambda code: self.product_entity_book2)
-        mock_discount_service = mock.Mock()
+        mock_promotion_service = mock.Mock()
+        mock_promotion_service.apply_policy.side_effect = lambda product_code, original_price, user=None: PriceResultEntity(
+            original=original_price,
+            discounted=original_price,
+            discount_amount=Decimal("0.00"),
+            discount_types=[]
+        )
         mock_coupon_service = mock.Mock(
             get_applicable_coupons=lambda **kwargs: [self.coupon_10_percent_for_all_products],
             get_coupons_by_code=lambda codes: [self.coupon_10_percent_for_all_products],
         )
         use_case = ProductDetailUseCase(
             product_repo=mock_product_repo,
-            discount_service=mock_discount_service,
+            promotion_service=mock_promotion_service,
             coupon_service=mock_coupon_service,
         )
         _, _, price_result = use_case.execute(
@@ -168,7 +181,13 @@ class ProductDetailUseCaseTest(TestCase):
 
     def test_쿠폰여러개_누적적용시_우선순위에_따라_할인(self):
         mock_product_repo = mock.Mock(get_product_by_code=lambda code: self.product_entity_book2)
-        mock_discount_service = mock.Mock()
+        mock_promotion_service = mock.Mock()
+        mock_promotion_service.apply_policy.side_effect = lambda product_code, original_price, user=None: PriceResultEntity(
+            original=original_price,
+            discounted=original_price,
+            discount_amount=Decimal("0.00"),
+            discount_types=[]
+        )
         mock_coupon_service = mock.Mock(
             get_applicable_coupons=lambda **kwargs: [
                 self.coupon_10_percent_for_all_products,
@@ -181,7 +200,7 @@ class ProductDetailUseCaseTest(TestCase):
         )
         use_case = ProductDetailUseCase(
             product_repo=mock_product_repo,
-            discount_service=mock_discount_service,
+            promotion_service=mock_promotion_service,
             coupon_service=mock_coupon_service,
         )
         _, _, price_result = use_case.execute(
@@ -194,14 +213,20 @@ class ProductDetailUseCaseTest(TestCase):
 
     def test_최소적용금액_안되는상품에_쿠폰적용시도(self):
         mock_product_repo = mock.Mock(get_product_by_code=lambda code: self.product_entity_book1)
-        mock_discount_service = mock.Mock()
+        mock_promotion_service = mock.Mock()
+        mock_promotion_service.apply_policy.side_effect = lambda product_code, original_price, user=None: PriceResultEntity(
+            original=original_price,
+            discounted=original_price,
+            discount_amount=Decimal("0.00"),
+            discount_types=[]
+        )
         mock_coupon_service = mock.Mock(
             get_applicable_coupons=lambda **kwargs: [self.coupon_10_percent_for_all_products],
             get_coupons_by_code=lambda codes: [self.coupon_10_percent_for_all_products],
         )
         use_case = ProductDetailUseCase(
             product_repo=mock_product_repo,
-            discount_service=mock_discount_service,
+            promotion_service=mock_promotion_service,
             coupon_service=mock_coupon_service,
         )
         _, _, price_result = use_case.execute(
@@ -213,14 +238,20 @@ class ProductDetailUseCaseTest(TestCase):
 
     def test_만료된_쿠폰적용시도(self):
         mock_product_repo = mock.Mock(get_product_by_code=lambda code: self.product_entity_book2)
-        mock_discount_service = mock.Mock()
+        mock_promotion_service = mock.Mock()
+        mock_promotion_service.apply_policy.side_effect = lambda product_code, original_price, user=None: PriceResultEntity(
+            original=original_price,
+            discounted=original_price,
+            discount_amount=Decimal("0.00"),
+            discount_types=[]
+        )
         mock_coupon_service = mock.Mock(
             get_applicable_coupons=lambda **kwargs: [self.coupon_expired],
             get_coupons_by_code=lambda codes: [self.coupon_expired],
         )
         use_case = ProductDetailUseCase(
             product_repo=mock_product_repo,
-            discount_service=mock_discount_service,
+            promotion_service=mock_promotion_service,
             coupon_service=mock_coupon_service,
         )
         _, _, price_result = use_case.execute(
@@ -232,14 +263,20 @@ class ProductDetailUseCaseTest(TestCase):
 
     def test_없는_쿠폰적용시도(self):
         mock_product_repo = mock.Mock(get_product_by_code=lambda code: self.product_entity_book2)
-        mock_discount_service = mock.Mock()
+        mock_promotion_service = mock.Mock()
+        mock_promotion_service.apply_policy.side_effect = lambda product_code, original_price, user=None: PriceResultEntity(
+            original=original_price,
+            discounted=original_price,
+            discount_amount=Decimal("0.00"),
+            discount_types=[]
+        )
         mock_coupon_service = mock.Mock(
             get_applicable_coupons=lambda **kwargs: [],
             get_coupons_by_code=lambda codes: [],
         )
         use_case = ProductDetailUseCase(
             product_repo=mock_product_repo,
-            discount_service=mock_discount_service,
+            promotion_service=mock_promotion_service,
             coupon_service=mock_coupon_service,
         )
         _, _, price_result = use_case.execute(
@@ -251,14 +288,20 @@ class ProductDetailUseCaseTest(TestCase):
 
     def test_사용할_수_없는_상태의_쿠폰적용시도(self):
         mock_product_repo = mock.Mock(get_product_by_code=lambda code: self.product_entity_book2)
-        mock_discount_service = mock.Mock()
+        mock_promotion_service = mock.Mock()
+        mock_promotion_service.apply_policy.side_effect = lambda product_code, original_price, user=None: PriceResultEntity(
+            original=original_price,
+            discounted=original_price,
+            discount_amount=Decimal("0.00"),
+            discount_types=[]
+        )
         mock_coupon_service = mock.Mock(
             get_applicable_coupons=lambda **kwargs: [self.coupon_inactive],
             get_coupons_by_code=lambda codes: [self.coupon_inactive],
         )
         use_case = ProductDetailUseCase(
             product_repo=mock_product_repo,
-            discount_service=mock_discount_service,
+            promotion_service=mock_promotion_service,
             coupon_service=mock_coupon_service,
         )
         _, _, price_result = use_case.execute(
@@ -286,14 +329,20 @@ class ProductDetailUseCaseTest(TestCase):
             is_active=True,
         )
         mock_product_repo = mock.Mock(get_product_by_code=lambda code: self.product_entity_book2)
-        mock_discount_service = mock.Mock()
+        mock_promotion_service = mock.Mock()
+        mock_promotion_service.apply_policy.side_effect = lambda product_code, original_price, user=None: PriceResultEntity(
+            original=original_price,
+            discounted=original_price,
+            discount_amount=Decimal("0.00"),
+            discount_types=[]
+        )
         mock_coupon_service = mock.Mock(
             get_applicable_coupons=lambda **kwargs: [coupon_book1_only],
             get_coupons_by_code=lambda codes: [coupon_book1_only],
         )
         use_case = ProductDetailUseCase(
             product_repo=mock_product_repo,
-            discount_service=mock_discount_service,
+            promotion_service=mock_promotion_service,
             coupon_service=mock_coupon_service,
         )
         _, _, price_result = use_case.execute(
@@ -306,14 +355,20 @@ class ProductDetailUseCaseTest(TestCase):
     def test_사용자대상불일치_쿠폰적용시도(self):
         # USER123 전용 쿠폰을 OTHER_USER가 사용 시도
         mock_product_repo = mock.Mock(get_product_by_code=lambda code: self.product_entity_book2)
-        mock_discount_service = mock.Mock()
+        mock_promotion_service = mock.Mock()
+        mock_promotion_service.apply_policy.side_effect = lambda product_code, original_price, user=None: PriceResultEntity(
+            original=original_price,
+            discounted=original_price,
+            discount_amount=Decimal("0.00"),
+            discount_types=[]
+        )
         mock_coupon_service = mock.Mock(
             get_applicable_coupons=lambda **kwargs: [self.coupon_for_user123],
             get_coupons_by_code=lambda codes: [self.coupon_for_user123],
         )
         use_case = ProductDetailUseCase(
             product_repo=mock_product_repo,
-            discount_service=mock_discount_service,
+            promotion_service=mock_promotion_service,
             coupon_service=mock_coupon_service,
         )
         # user 파라미터에 "OTHER_USER"를 넣어 테스트
@@ -327,14 +382,21 @@ class ProductDetailUseCaseTest(TestCase):
     def test_최소적용금액_경계값_쿠폰적용(self):
         # BOOK001 가격 5,000원, 최소 적용 금액 5,000원인 쿠폰(1000원 할인) 적용 시
         mock_product_repo = mock.Mock(get_product_by_code=lambda code: self.product_entity_book1)
-        mock_discount_service = mock.Mock()
+        mock_promotion_service = mock.Mock()
+        mock_promotion_service.apply_policy.side_effect = lambda product_code, original_price, user=None: PriceResultEntity(
+            original=original_price,
+            discounted=original_price,
+            discount_amount=Decimal("0.00"),
+            discount_types=[]
+        )
+
         mock_coupon_service = mock.Mock(
             get_applicable_coupons=lambda **kwargs: [self.coupon_min5000],
             get_coupons_by_code=lambda codes: [self.coupon_min5000],
         )
         use_case = ProductDetailUseCase(
             product_repo=mock_product_repo,
-            discount_service=mock_discount_service,
+            promotion_service=mock_promotion_service,
             coupon_service=mock_coupon_service,
         )
         _, _, price_result = use_case.execute(
@@ -388,14 +450,21 @@ class ProductDetailUseCaseTest(TestCase):
         )
         # (1) [pct, fix]: 20,000 → 16,000 → 11,000
         mock_product_repo = mock.Mock(get_product_by_code=lambda code: book)
-        mock_discount_service = mock.Mock()
+        mock_promotion_service = mock.Mock()
+        mock_promotion_service.apply_policy.side_effect = lambda product_code, original_price, user=None: PriceResultEntity(
+            original=original_price,
+            discounted=original_price,
+            discount_amount=Decimal("0.00"),
+            discount_types=[]
+        )
+
         mock_coupon_service1 = mock.Mock(
             get_applicable_coupons=lambda **kwargs: [coupon_pct, coupon_fix],
             get_coupons_by_code=lambda codes: [coupon_pct, coupon_fix],
         )
         use_case1 = ProductDetailUseCase(
             product_repo=mock_product_repo,
-            discount_service=mock_discount_service,
+            promotion_service=mock_promotion_service,
             coupon_service=mock_coupon_service1,
         )
         _, _, result1 = use_case1.execute(
@@ -412,7 +481,7 @@ class ProductDetailUseCaseTest(TestCase):
         )
         use_case2 = ProductDetailUseCase(
             product_repo=mock_product_repo,
-            discount_service=mock_discount_service,
+            promotion_service=mock_promotion_service,
             coupon_service=mock_coupon_service2,
         )
         _, _, result2 = use_case2.execute(
@@ -430,6 +499,14 @@ class ProductDetailUseCaseTest(TestCase):
             get_applicable_coupons=lambda **kwargs: [self.coupon_5000_fixed_for_book002],
             get_coupons_by_code=lambda codes: [self.coupon_5000_fixed_for_book002],
         )
+        mock_promotion_service = mock.Mock()
+        mock_promotion_service.apply_policy.side_effect = lambda product_code, original_price, user=None: PriceResultEntity(
+            original=original_price,
+            discounted=original_price,
+            discount_amount=Decimal("0.00"),
+            discount_types=[]
+        )
+
         # DiscountService가 실제로는 사용되지 않으므로 Mock
         # to_discount_policy()는 FixedDiscountPolicy 객체이고, apply()를 patch
         broken_policy = mock.Mock(spec=DiscountPolicy)
@@ -439,7 +516,7 @@ class ProductDetailUseCaseTest(TestCase):
 
         use_case = ProductDetailUseCase(
             product_repo=mock_product_repo,
-            discount_service=mock.Mock(),
+            promotion_service=mock_promotion_service,
             coupon_service=mock_coupon_service,
         )
         with self.assertRaises(Exception) as cm:
@@ -453,7 +530,13 @@ class ProductDetailUseCaseTest(TestCase):
     def test_중복_쿠폰코드_적용시도(self):
         # 동일 쿠폰 코드를 중복 전달하면 한 번만 적용(중복 방지) 혹은 두 번 적용되는지 확인
         mock_product_repo = mock.Mock(get_product_by_code=lambda code: self.product_entity_book2)
-        mock_discount_service = mock.Mock()
+        mock_promotion_service = mock.Mock()
+        mock_promotion_service.apply_policy.side_effect = lambda product_code, original_price, user=None: PriceResultEntity(
+            original=original_price,
+            discounted=original_price,
+            discount_amount=Decimal("0.00"),
+            discount_types=[]
+        )
         # 두 번 동일 쿠폰 반환
         mock_coupon_service = mock.Mock(
             get_applicable_coupons=lambda **kwargs: [self.coupon_5000_fixed_for_book002, self.coupon_5000_fixed_for_book002],
@@ -461,7 +544,7 @@ class ProductDetailUseCaseTest(TestCase):
         )
         use_case = ProductDetailUseCase(
             product_repo=mock_product_repo,
-            discount_service=mock_discount_service,
+            promotion_service=mock_promotion_service,
             coupon_service=mock_coupon_service,
         )
         _, _, price_result = use_case.execute(
@@ -498,14 +581,21 @@ class ProductDetailUseCaseTest(TestCase):
             is_active=True,
         )
         mock_product_repo = mock.Mock(get_product_by_code=lambda code: cheap_book)
-        mock_discount_service = mock.Mock()
+        mock_promotion_service = mock.Mock()
+        mock_promotion_service.apply_policy.side_effect = lambda product_code, original_price, user=None: PriceResultEntity(
+            original=original_price,
+            discounted=original_price,
+            discount_amount=Decimal("0.00"),
+            discount_types=[]
+        )
+
         mock_coupon_service = mock.Mock(
             get_applicable_coupons=lambda **kwargs: [coupon_over],
             get_coupons_by_code=lambda codes: [coupon_over],
         )
         use_case = ProductDetailUseCase(
             product_repo=mock_product_repo,
-            discount_service=mock_discount_service,
+            promotion_service=mock_promotion_service,
             coupon_service=mock_coupon_service,
         )
         _, _, price_result = use_case.execute(

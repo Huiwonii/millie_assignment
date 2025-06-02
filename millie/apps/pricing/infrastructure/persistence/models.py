@@ -62,6 +62,30 @@ class Coupon(models.Model):
         db_table_comment = "쿠폰 테이블"
 
 
+class Promotion(models.Model):
+    id = models.UUIDField(primary_key=True, default=UUID, editable=False)
+    name = models.CharField(max_length=255)
+    discount_policy = models.ForeignKey(DiscountPolicy, on_delete=models.CASCADE)
+
+    target_user = models.ForeignKey("User", null=True, on_delete=models.CASCADE)
+    target_product_code = models.ForeignKey(Book, to_field="code", null=True, on_delete=models.CASCADE)
+
+    is_active = models.BooleanField(default=True)
+    is_auto_discount = models.BooleanField(default=False)
+    apply_priority = models.IntegerField(default=0)
+
+    effective_start_at = models.DateTimeField()
+    effective_end_at = models.DateTimeField()
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = "promotions"
+        db_table_comment = "프로모션 테이블"
+
+
+
 class User(models.Model):
     """
     사용자 도메인은 본 과제의 핵심 구현이 아니지만 할인정책의 확장성을 설계하기 위해 추가
