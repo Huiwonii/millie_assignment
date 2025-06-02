@@ -12,19 +12,9 @@ class CouponSummarySerializer(serializers.Serializer):
         decimal_places=2
     )
 
-    # min_purchase_amount = serializers.DecimalField(
-    #     source="discount_policy.minimum_purchase_amount",
-    #     max_digits=10,
-    #     decimal_places=2
-    # )
-    # valid_until = serializers.DateTimeField()
-    # status = serializers.CharField()
-
-
-
 
 class PriceResultSerializer(serializers.Serializer):
     original = serializers.DecimalField(max_digits=10, decimal_places=2)
     discounted = serializers.DecimalField(max_digits=10, decimal_places=2)
     discount_amount = serializers.DecimalField(max_digits=10, decimal_places=2)
-    discount_type = serializers.CharField()
+    discount_types = serializers.ListField(child=serializers.CharField(), allow_empty=True)

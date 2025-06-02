@@ -1,31 +1,24 @@
-from apps.pricing.domain.entity.coupon import Coupon as CouponDomainEntity
-from apps.pricing.domain.policy.discount_policy import DiscountPolicy as DiscountPolicyDomainEntity
+from apps.pricing.domain.entity.coupon import Coupon as CouponEntity
 from apps.pricing.domain.policy.discount_policy import (
-    PercentageDiscountPolicy,
+    DiscountPolicy,
     FixedDiscountPolicy,
+    PercentageDiscountPolicy,
 )
-from apps.pricing.domain.value_objects import (
-    DiscountType,
-    CouponStatus,
-)
+from apps.pricing.domain.value_objects import DiscountType
 from apps.pricing.infrastructure.persistence.models import Coupon as CouponModel
 from apps.pricing.infrastructure.persistence.models import DiscountPolicy as DiscountPolicyModel
 from apps.pricing.infrastructure.persistence.models import DiscountTarget as DiscountTargetModel
-from apps.pricing.domain.entity.price_result import PriceResult
+
 
 class CouponMapper:
 
     def __init__(self):
         self.discount_policy_mapper = DiscountPolicyMapper()
 
-
-    def to_domain(self, coupon_model: CouponModel) -> CouponDomainEntity:
+    def to_domain(self, coupon_model: CouponModel) -> CouponEntity:
         policy_model = coupon_model.discount_policy
-
-        # DiscountPolicyModel → 도메인 전략 객체
         strategy = self.discount_policy_mapper.to_domain(policy_model)
 
-        # DiscountTarget(할인 대상) 정보 중, 우선순위 가장 높은 레코드
         dt_model = (
             DiscountTargetModel.objects
             .filter(discount_policy=policy_model)
@@ -41,10 +34,10 @@ class CouponMapper:
             if dt_model.target_user_id:
                 target_user_id = dt_model.target_user_id.id
 
-        return CouponDomainEntity(id=coupon_model.id,
+        return CouponEntity(id=coupon_model.id,
             code=coupon_model.code,
             name=coupon_model.name,
-            discount_policy=strategy,  # 도메인 전략 객체
+            discount_policy=strategy,
             valid_until=coupon_model.valid_until,
             status=coupon_model.status,
             created_at=coupon_model.created_at,
@@ -61,7 +54,7 @@ class DiscountPolicyMapper:
     def to_domain(
         self,
         model: DiscountPolicyModel,
-    ) -> DiscountPolicyDomainEntity:
+    ) -> DiscountPolicy:
         if model.discount_type == DiscountType.PERCENTAGE.value:
             return PercentageDiscountPolicy(
                 discount_type=model.discount_type,

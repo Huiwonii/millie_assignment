@@ -1,4 +1,4 @@
-from apps.product.domain.entity import Product as ProductDomainEntity
+from apps.product.domain.entity import Product as ProductEntity
 from apps.product.infrastructure.persistence.models import Book as BookModel
 from apps.product.infrastructure.persistence.models import BookDetail as BookDetailModel
 from apps.product.infrastructure.persistence.models import BookFeature as BookFeatureModel
@@ -9,9 +9,9 @@ from apps.product.infrastructure.persistence.models import Author as AuthorModel
 class ProductMapper:
 
     @staticmethod
-    def to_domain(book_model: BookModel) -> ProductDomainEntity:
+    def to_domain(book_model: BookModel) -> ProductEntity:
         # TODO! feature의 경우 설계는 여러개일 수 있도록 해놨으나 핵심구현 부분이 아니라서 첫번째것만 가져옴
-        return ProductDomainEntity(
+        return ProductEntity(
             code=book_model.code,
             name=book_model.name,
             price=book_model.price,

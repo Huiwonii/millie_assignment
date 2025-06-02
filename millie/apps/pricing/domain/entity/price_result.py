@@ -1,28 +1,17 @@
-# from decimal import Decimal
-
-
-# class PriceResult:
-#     def __init__(
-#         self,
-#         original: Decimal,
-#         discounted: Decimal,
-#         discount_amount: Decimal = Decimal("0"),
-#         discount_type: str = None,
-#     ):
-#         self.original = original
-#         self.discounted = discounted
-#         self.discount_amount = discount_amount
-#         self.discount_type = discount_type
-
-
-
-from dataclasses import dataclass
+from dataclasses import (
+    dataclass,
+    field,
+)
 from decimal import Decimal
-from typing import Optional
+from typing import (
+    List,
+    Optional,
+)
+
 
 @dataclass
 class PriceResult:
     original: Decimal
     discounted: Decimal
     discount_amount: Decimal = Decimal("0")
-    discount_type: Optional[str] = None
+    discount_types: List[str] = field(default_factory=list)

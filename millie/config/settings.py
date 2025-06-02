@@ -89,6 +89,14 @@ DATABASES = {
     }
 }
 
+import sys
+
+if 'test' in sys.argv or 'pytest' in sys.argv:
+    DATABASES['default'] = {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': ':memory:',  # 인메모리 DB. 혹은 'db.sqlite3'로 변경 가능
+    }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators

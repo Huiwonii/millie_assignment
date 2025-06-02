@@ -1,10 +1,11 @@
 from uuid import UUID
+
 from django.db import models
+
 from apps.product.infrastructure.persistence.models import Book
 from apps.pricing.domain.value_objects import (
     TargetType,
     DiscountType,
-    CouponStatus,
 )
 
 
