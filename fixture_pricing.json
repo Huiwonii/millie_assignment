@@ -3,7 +3,7 @@
     "model": "pricing.discountpolicy",
     "pk": "0bae76ec-7230-41c1-9297-3461bd8aa115",
     "fields": {
-      "discount_type": "percentage",
+      "discount_type": "PERCENTAGE",
       "value": "0.10",
       "target_type": "PRODUCT",
       "is_active": true,
