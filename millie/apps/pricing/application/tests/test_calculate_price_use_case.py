@@ -15,7 +15,7 @@ from apps.pricing.domain.policy.discount_policy import (
 )
 
 
-class GetPriceUseCaseTest(TestCase):
+class CalculatePriceUseCaseTest(TestCase):
     def setUp(self):
         now = timezone.now()
         past = now - timedelta(days=10)
