@@ -81,62 +81,90 @@
   │   ├── product/
   │   │   ├── application/
   │   │   │   ├── product_list_use_case.py
-  │   │   │   ├── product_detail_use_case.py
-  │   │   │   └── tests/
-  │   │   │        └── test_product_detail_use_case.py
+  │   │   │   └── product_detail_use_case.py
   │   │   │
   │   │   ├── domain/
   │   │   │   ├── entity.py
   │   │   │   ├── value_objects.py
-  │   │   │   ├── dto.py
   │   │   │   └── repository.py
+  │   │   │
   │   │   ├── infrastructure/
   │   │   │   └── persistence/
   │   │   │       ├── models.py
   │   │   │       ├── mapper.py
-  │   │   │       └── repository_impl.py
+  │   │   │       └── product_repo_impl.py
+  │   │   │
   │   │   └── interface/
   │   │       ├── views/
   │   │       │     ├── product_list_views.py
   │   │       │     └── product_detail_views.py
-  │   │       └── tests/
-  │   │             ├── test_product_list_api.py
-  │   │             └── test_product_detail_api.py
+  │   │       ├── tests/
+  │   │       │     ├── test_product_list_api.py
+  │   │       │     └── test_product_detail_api.py
+  │   │       └── serializer.py
+  │   │
+  │   │
+  │   │
+  │   │
   │   │
   │   ├── pricing/
   │   │   ├── application/
-  │   │   │   ├── coupon_service.py
-  │   │   │   ├── discount_service.py
-  │   │   │   └── promotion_service.py
+  │   │   │   ├── services/
+  │   │   │   │    ├── coupon_service.py
+  │   │   │   │    └── promotion_service.py
+  │   │   │   │
+  │   │   │   ├── use_case/
+  │   │   │   │    └── calculate_price_use_case.py
+  │   │   │   │
+  │   │   │   └── tests/
+  │   │   │        └── test_get_price_use_case.py
+  │   │   │   
   │   │   ├── domain/
   │   │   │   ├── entity/
-  │   │   │   │   ├── coupon.py
-  │   │   │   │   └── price_result.py
+  │   │   │   │    ├── coupon.py
+  │   │   │   │    ├── promotion.py
+  │   │   │   │    └── price_result.py
+  │   │   │   │
   │   │   │   ├── policy/
-  │   │   │   │   ├── discount_policy.py
-  │   │   │   │   ├── fixed_discount_policy.py
-  │   │   │   │   ├── percentage_discount_policy.py
-  │   │   │   │   └── conditional_policy.py
-  │   │   │   ├── repository.py
+  │   │   │   │    └── discount_policy.py
+  │   │   │   │
+  │   │   │   ├── repositories/
+  │   │   │   │    ├── coupon_repository.py
+  │   │   │   │    └── promotion_repository.py 
+  │   │   │   │ 
   │   │   │   └── value_objects.py
-  │   │   └── infrastructure/
-  │   │       └── persistence/
-  │   │           ├── models.py
-  │   │           ├── mapper.py
-  │   │           └── repository_impl.py
+  │   │   │   │
+  │   │   ├── infrastructure/
+  │   │   │   └── persistence/
+  │   │   │       ├── models.py
+  │   │   │       ├── mapper.py
+  │   │   │       └── repository_impl/
+  │   │   │             ├── coupon_repo_impl.py
+  │   │   │             └── promotion_repo_impl.py
+  │   │   └── interface/
+  │   │           ├── views/
+  │   │           │     └── coupon_apply_views.py
+  │   │           ├── tests/
+  │   │           │     └── test_coupon_apply_api.py
+  │   │           └── serializer.py
+  │   │             
   │   └── utils/
-  │       └── const.py
+  │       ├── const.py
+  │       ├── exceptions.py
+  │       ├── messages.py
+  │       └── response.py
+  │      
   ├── config/
   │   ├── settings.py
   │   ├── urls.py
   │   ├── wsgi.py
   │   └── asgi.py
+  │
   ├── docker-compose.yml
   ├── fixture_books.json
   ├── fixture_pricing.json
   ├── manage.py
-  ├── pytest.ini
-  ├── requirements.txt
+  └── requirements.txt
 ```
 
 

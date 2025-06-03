@@ -1,8 +1,8 @@
 from decimal import Decimal
 from typing import List, Optional, Tuple
 
-from apps.pricing.application.coupon_service import CouponService
-from apps.pricing.application.promotion_service import PromotionService
+from apps.pricing.application.services.coupon_service import CouponService
+from apps.pricing.application.services.promotion_service import PromotionService
 from apps.product.domain.entity import Product as ProductEntity
 from apps.pricing.domain.entity.coupon import Coupon as CouponEntity
 from apps.pricing.domain.entity.price_result import PriceResult as PriceResultEntity

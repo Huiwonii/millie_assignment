@@ -4,14 +4,11 @@ from rest_framework import status
 from apps.product.application.get_product_detail_use_case import GetProductDetailUseCase
 from apps.product.infrastructure.persistence.product_repo_impl import ProductRepoImpl
 from apps.product.interface.serializer import ProductDetailSerializer
-from apps.pricing.application.coupon_service import CouponService
-from apps.pricing.application.promotion_service import PromotionService
+from apps.pricing.application.services.coupon_service import CouponService
+from apps.pricing.application.services.promotion_service import PromotionService
 from apps.pricing.infrastructure.persistence.repository_impl.coupon_repo_impl import CouponRepoImpl
 from apps.pricing.infrastructure.persistence.repository_impl.promotion_repo_impl import PromotionRepoImpl
-from apps.pricing.interface.serializer import (
-    CouponSummarySerializer,
-    PriceResultSerializer,
-)
+from apps.pricing.interface.serializer import CouponSummarySerializer
 
 from apps.utils import (
     const,
@@ -50,7 +47,7 @@ class ProductDetailView(APIView):
                 user=user,
                 coupon_code=coupon_code,
             )
-        except Exception as e:
+        except Exception as e:                  # NOTE! 실제 서비스에서는 이렇게 예외처리 하지 않고 더 세밀히 해야함
             if isinstance(e, NotFoundException):
                 return build_api_response(
                     data={},
@@ -67,12 +64,10 @@ class ProductDetailView(APIView):
 
         serialized_product = ProductDetailSerializer(product_entity).data
         serialized_coupons = CouponSummarySerializer(coupon_list, many=True).data
-        # serialized_price_result = PriceResultSerializer(price_result).data
 
         response_data = {
             const.PRODUCT: serialized_product,
             const.AVAILABLE_DISCOUNT: serialized_coupons,
-            # const.PRICE_CALCULATE_RESULT: serialized_price_result,
         }
 
         return build_api_response(
