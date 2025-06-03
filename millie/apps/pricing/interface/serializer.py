@@ -17,6 +17,7 @@ class CouponSummarySerializer(serializers.Serializer):
     status = serializers.CharField()
     created_at = serializers.DateTimeField()
 
+
 class PriceResultSerializer(serializers.Serializer):
     original = serializers.DecimalField(max_digits=10, decimal_places=2)
     discounted = serializers.DecimalField(max_digits=10, decimal_places=2)

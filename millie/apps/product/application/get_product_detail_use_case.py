@@ -5,8 +5,6 @@ from apps.pricing.application.services.coupon_service import CouponService
 from apps.pricing.application.services.promotion_service import PromotionService
 from apps.product.domain.entity import Product as ProductEntity
 from apps.pricing.domain.entity.coupon import Coupon as CouponEntity
-from apps.pricing.domain.entity.price_result import PriceResult as PriceResultEntity
-from apps.pricing.domain.policy.discount_policy import DiscountPolicy
 from apps.product.domain.repository import ProductRepository
 
 from apps.utils.exceptions import NotFoundException
@@ -23,7 +21,6 @@ class GetProductDetailUseCase:
         self._promotion_service = promotion_service
         self._coupon_service = coupon_service
 
-    # TODO! execute 함수 코드 리팩토링 필요
     def execute(
         self,
         code: str,
@@ -34,7 +31,7 @@ class GetProductDetailUseCase:
         1) 상품 조회 및 활성 상태 검증
         2) 화면에 보여줄 “적용 가능 쿠폰” 필터링
         """
-        product = self._fetch_and_validate_product(code)
+        product = self._fetch(code)
         base_price = product.price
 
         available_coupons = self._filter_available_coupons(product, user, base_price)
@@ -48,7 +45,7 @@ class GetProductDetailUseCase:
     # ──────────────────────────────────────────────────────────────────────────
     # 상품 조회 및 활성 상태 검증
     # ──────────────────────────────────────────────────────────────────────────
-    def _fetch_and_validate_product(self, code: str) -> ProductEntity:
+    def _fetch(self, code: str) -> ProductEntity:
         try:
             product = self._product_repo.get_product_by_code(code)
         except Exception:

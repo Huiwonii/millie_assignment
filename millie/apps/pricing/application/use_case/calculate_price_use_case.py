@@ -1,5 +1,9 @@
 from decimal import Decimal
-from typing import List, Optional, Tuple
+from typing import (
+    List,
+    Optional,
+    Tuple,
+)
 
 from apps.pricing.application.services.coupon_service import CouponService
 from apps.pricing.application.services.promotion_service import PromotionService

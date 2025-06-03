@@ -24,7 +24,7 @@ class CouponMapper:
         discount_target_model = (
             DiscountTargetModel.objects
             .filter(discount_policy=policy_model)
-            .order_by("apply_priority")
+            .order_by("apply_priority", "created_at")
             .first()
         )
         target_product_code = None

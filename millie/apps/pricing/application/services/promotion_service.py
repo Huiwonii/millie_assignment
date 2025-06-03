@@ -1,12 +1,7 @@
 from decimal import Decimal
-from typing import (
-    List,
-    Optional,
-    Tuple,
-)
+from typing import Tuple
 
 from apps.pricing.domain.entity.price_result import PriceResult as PriceResultEntity
-from apps.pricing.domain.policy.discount_policy import DiscountPolicy
 from apps.pricing.domain.repositories.promotion_repository import PromotionRepository
 
 

@@ -28,6 +28,7 @@ class Coupon:
     target_user_id: Optional[UUID]
     minimum_purchase_amount: Decimal
     is_active: bool = False
+    apply_priority: int = 0
 
     @property
     def discount_type(self):

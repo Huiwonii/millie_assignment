@@ -1,22 +1,19 @@
-from datetime import datetime
 from uuid import UUID
 from typing import (
     List,
     Optional,
 )
 
-from django.db.models import Q, OuterRef, Subquery, IntegerField
-from django.utils import timezone
+from django.db.models import (
+    IntegerField,
+    OuterRef,
+    Q,
+    Subquery,
+)
 
 
 from apps.pricing.domain.entity.promotion import Promotion as PromotionEntity
-from apps.pricing.domain.policy.discount_policy import (
-    FixedDiscountPolicy,
-    PercentageDiscountPolicy,
-)
-from apps.pricing.domain.policy.discount_policy import DiscountPolicy
 from apps.pricing.domain.repositories.promotion_repository import PromotionRepository
-from apps.pricing.domain.value_objects import DiscountType
 from apps.pricing.infrastructure.persistence.mapper import PromotionMapper
 from apps.pricing.infrastructure.persistence.models import (
     Promotion as PromotionModel,

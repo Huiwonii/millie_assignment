@@ -1,13 +1,12 @@
 from rest_framework.views import APIView
-from rest_framework.response import Response
 from rest_framework import status
 
-from apps.pricing.application.use_case.calculate_price_use_case import CalculatePriceUseCase
 from apps.pricing.application.services.coupon_service import CouponService
 from apps.pricing.application.services.promotion_service import PromotionService
+from apps.pricing.application.use_case.calculate_price_use_case import CalculatePriceUseCase
+from apps.product.infrastructure.persistence.product_repo_impl import ProductRepoImpl
 from apps.pricing.infrastructure.persistence.repository_impl.coupon_repo_impl import CouponRepoImpl
 from apps.pricing.infrastructure.persistence.repository_impl.promotion_repo_impl import PromotionRepoImpl
-from apps.product.infrastructure.persistence.product_repo_impl import ProductRepoImpl
 from apps.pricing.interface.serializer import (
     CouponSummarySerializer,
     PriceResultSerializer,
@@ -19,6 +18,7 @@ from apps.utils import (
 )
 from apps.utils.exceptions import NotFoundException
 from apps.utils.response import build_api_response
+
 
 class CouponApplyView(APIView):
     def __init__(self, **kwargs):

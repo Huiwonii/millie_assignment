@@ -15,6 +15,7 @@ class ProductListView(APIView):
         super().__init__(**kwargs)
         self.product_list_use_case = GetProductListUseCase(ProductRepoImpl())
 
+    # TODO! 페이징, 필터 등의 기능은 요구사항에 맞게 추후 구현 필요
     def get(self, request):
         try:
             products = self.product_list_use_case.execute()
