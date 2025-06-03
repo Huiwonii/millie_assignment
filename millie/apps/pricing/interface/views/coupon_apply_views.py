@@ -3,8 +3,8 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from apps.pricing.application.use_case.calculate_price_use_case import CalculatePriceUseCase
-from apps.pricing.application.coupon_service import CouponService
-from apps.pricing.application.promotion_service import PromotionService
+from apps.pricing.application.services.coupon_service import CouponService
+from apps.pricing.application.services.promotion_service import PromotionService
 from apps.pricing.infrastructure.persistence.repository_impl.coupon_repo_impl import CouponRepoImpl
 from apps.pricing.infrastructure.persistence.repository_impl.promotion_repo_impl import PromotionRepoImpl
 from apps.product.infrastructure.persistence.product_repo_impl import ProductRepoImpl
@@ -62,7 +62,7 @@ class CouponApplyView(APIView):
                 code=status.HTTP_404_NOT_FOUND,
                 http_status=status.HTTP_404_NOT_FOUND,
             )
-        except Exception as e:
+        except Exception as e:                       # NOTE! 실제 서비스에서는 이렇게 예외처리 하지 않고 더 세밀히 해야함
             return build_api_response(
                 data={},
                 message=f"{messages.INTERNAL_SERVER_ERROR}: {str(e)}",
