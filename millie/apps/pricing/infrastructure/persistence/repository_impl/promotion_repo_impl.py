@@ -5,73 +5,141 @@ from typing import (
     Optional,
 )
 
-from django.db.models import Q
+from django.db.models import Q, OuterRef, Subquery, IntegerField
 from django.utils import timezone
 
 
-from apps.pricing.domain.entity.coupon import Coupon as CouponEntity
+from apps.pricing.domain.entity.promotion import Promotion as PromotionEntity
 from apps.pricing.domain.policy.discount_policy import (
     FixedDiscountPolicy,
     PercentageDiscountPolicy,
 )
-from apps.pricing.infrastructure.persistence.models import Promotion as PromotionModel
 from apps.pricing.domain.policy.discount_policy import DiscountPolicy
 from apps.pricing.domain.repositories.promotion_repository import PromotionRepository
 from apps.pricing.domain.value_objects import DiscountType
+from apps.pricing.infrastructure.persistence.mapper import PromotionMapper
+from apps.pricing.infrastructure.persistence.models import (
+    Promotion as PromotionModel,
+    DiscountTarget as DiscountTargetModel,
+)
 
 
 class PromotionRepoImpl(PromotionRepository):
+
+
+    def __init__(self):
+        self.promotion_mapper = PromotionMapper()
+
+    # def get_active_promotions(
+    #     self,
+    #     target_product_code: Optional[str] = None,
+    #     target_user_id: Optional[UUID] = None,
+    # ) -> List[DiscountPolicy]:
+    #     now = timezone.now()
+
+    #     target_q = Q()
+
+    #     if target_product_code:
+    #         target_q |= Q(target_product_code=target_product_code)
+
+    #     if target_user_id:
+    #         target_q |= Q(target_user=target_user_id)
+
+    #     target_q |= Q(target_product_code__isnull=True, target_user__isnull=True)
+
+    #     discount_target_qs = DiscountTarget.objects.filter(
+    #         discount_policy=OuterRef('discount_policy_id')
+    #     ).filter(target_q).order_by('apply_priority')
+
+    #     promotions = (
+    #         PromotionModel.objects.filter(
+    #             is_auto_discount=True,          # 자동할인 적용인것만
+    #         ).annotate(
+    #             target_priority=Subquery(
+    #                 discount_target_qs.values('apply_priority')[:1],
+    #                 output_field=IntegerField()
+    #             )
+    #         ).order_by('target_priority')
+    #     )
+
+    #     result: List[DiscountPolicy] = []
+    #     for promotion in promotions:
+    #         policy = promotion.discount_policy
+    #         if not policy or not policy.is_active:
+    #             continue
+
+    #         if policy.discount_type == DiscountType.PERCENTAGE.value:
+    #             result.append(
+    #                 PercentageDiscountPolicy(
+    #                     discount_type=policy.discount_type,
+    #                     discount_rate=policy.value,
+    #                 )
+    #             )
+    #         elif policy.discount_type == DiscountType.FIXED.value:
+    #             result.append(
+    #                 FixedDiscountPolicy(
+    #                     discount_type=policy.discount_type,
+    #                     discount_amount=policy.value,
+    #                 )
+    #             )
+
+    #     return result
+
+
 
     def get_active_promotions(
         self,
         target_product_code: Optional[str] = None,
         target_user_id: Optional[UUID] = None,
-    ) -> List[DiscountPolicy]:
-        now = timezone.now()
+    ) -> List[Optional[PromotionEntity]]:
 
-        # 조건 1: 상품 대상 프로모션
-        q_product = Q(target_product_code=target_product_code)
 
-        # 조건 2: 유저 대상 프로모션
-        q_user = Q()
+        target_q = Q()
+
+        if target_product_code:
+            target_q |= Q(target_product_code=target_product_code)
+
         if target_user_id:
-            q_user = Q(target_user=target_user_id)
+            target_q |= Q(target_user=target_user_id)
 
-        # 조건 3: 전체 대상 프로모션
-        q_all = Q(target_product_code__isnull=True, target_user__isnull=True)
+        target_q |= Q(target_product_code__isnull=True, target_user__isnull=True)
 
-        # 최종 쿼리: 세 조건을 OR로 묶음 + 공통조건 필터링
-        combined_q = q_product | q_user | q_all
+        discount_target_qs = DiscountTargetModel.objects.filter(
+            discount_policy=OuterRef('discount_policy_id')
+        ).filter(target_q).order_by('apply_priority')
 
         promotions = (
             PromotionModel.objects.filter(
-                combined_q,
-                is_active=True,
-                is_auto_discount=True,      # 자동할인 적용인것만
-                effective_start_at__lte=now,
-                effective_end_at__gte=now,
-            ).order_by("apply_priority")
+                is_auto_discount=True,          # 자동할인 적용인것만
+            ).annotate(
+                target_priority=Subquery(
+                    discount_target_qs.values('apply_priority')[:1],
+                    output_field=IntegerField()
+                )
+            ).order_by('target_priority')
         )
 
-        result: List[DiscountPolicy] = []
-        for promo in promotions:
-            policy = promo.discount_policy
-            if not policy or not policy.is_active:
-                continue
+        return [self.promotion_mapper.to_domain(promotion) for promotion in promotions]
 
-            if policy.discount_type == DiscountType.PERCENTAGE.value:
-                result.append(
-                    PercentageDiscountPolicy(
-                        discount_type=policy.discount_type,
-                        discount_rate=policy.value,
-                    )
-                )
-            elif policy.discount_type == DiscountType.FIXED.value:
-                result.append(
-                    FixedDiscountPolicy(
-                        discount_type=policy.discount_type,
-                        discount_amount=policy.value,
-                    )
-                )
+        # result: List[DiscountPolicy] = []
+        # for promotion in promotions:
+        #     policy = promotion.discount_policy
+        #     if not policy or not policy.is_active:
+        #         continue
 
-        return result
+        #     if policy.discount_type == DiscountType.PERCENTAGE.value:
+        #         result.append(
+        #             PercentageDiscountPolicy(
+        #                 discount_type=policy.discount_type,
+        #                 discount_rate=policy.value,
+        #             )
+        #         )
+        #     elif policy.discount_type == DiscountType.FIXED.value:
+        #         result.append(
+        #             FixedDiscountPolicy(
+        #                 discount_type=policy.discount_type,
+        #                 discount_amount=policy.value,
+        #             )
+        #         )
+
+        # return result

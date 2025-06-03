@@ -1,9 +1,9 @@
 from rest_framework.views import APIView
 from rest_framework import status
 
-from apps.product.application.product_detail_use_case import ProductDetailUseCase
-from apps.product.infrastructure.persistence.repository_impl import ProductRepositoryImpl
-from apps.product.interface.serializer import ProductSerializer
+from apps.product.application.get_product_detail_use_case import GetProductDetailUseCase
+from apps.product.infrastructure.persistence.product_repo_impl import ProductRepoImpl
+from apps.product.interface.serializer import ProductDetailSerializer
 from apps.pricing.application.coupon_service import CouponService
 from apps.pricing.application.promotion_service import PromotionService
 from apps.pricing.infrastructure.persistence.repository_impl.coupon_repo_impl import CouponRepoImpl
@@ -25,8 +25,8 @@ class ProductDetailView(APIView):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self._use_case = ProductDetailUseCase(
-            product_repo=ProductRepositoryImpl(),
+        self._use_case = GetProductDetailUseCase(
+            product_repo=ProductRepoImpl(),
             promotion_service=PromotionService(PromotionRepoImpl()),
             coupon_service=CouponService(CouponRepoImpl()),
         )
@@ -45,7 +45,7 @@ class ProductDetailView(APIView):
         user = request.user if getattr(request.user, "is_authenticated", False) else None
 
         try:
-            product_entity, coupon_list, price_result = self._use_case.execute(
+            product_entity, coupon_list = self._use_case.execute(
                 code=code,
                 user=user,
                 coupon_code=coupon_code,
@@ -65,14 +65,14 @@ class ProductDetailView(APIView):
                 http_status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
-        serialized_product = ProductSerializer(product_entity).data
+        serialized_product = ProductDetailSerializer(product_entity).data
         serialized_coupons = CouponSummarySerializer(coupon_list, many=True).data
-        serialized_price_result = PriceResultSerializer(price_result).data
+        # serialized_price_result = PriceResultSerializer(price_result).data
 
         response_data = {
             const.PRODUCT: serialized_product,
             const.AVAILABLE_DISCOUNT: serialized_coupons,
-            const.PRICE_CALCULATE_RESULT: serialized_price_result,
+            # const.PRICE_CALCULATE_RESULT: serialized_price_result,
         }
 
         return build_api_response(

@@ -26,10 +26,14 @@ class CouponRepoImpl(CouponRepository):
     def get_coupons_by_code(
         self,
         coupon_code: List[str],
-    ) -> Optional[CouponEntity]:
+        is_valid: bool = True,
+    ) -> List[Optional[CouponEntity]]:
 
         coupons = CouponModel.objects.filter(code__in=coupon_code)
-        return [self.coupon_mapper.to_domain(c) for c in coupons if c.valid_until >= timezone.now()]
+
+        if is_valid:
+            coupons = coupons.filter(valid_until__gte=timezone.now(), status=CouponStatus.ACTIVE.value)
+        return [self.coupon_mapper.to_domain(c) for c in coupons]
 
 
     def list_active_not_expired(

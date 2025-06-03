@@ -83,16 +83,26 @@
   │   │   │   ├── product_list_use_case.py
   │   │   │   ├── product_detail_use_case.py
   │   │   │   └── tests/
+  │   │   │        └── test_product_detail_use_case.py
+  │   │   │
   │   │   ├── domain/
   │   │   │   ├── entity.py
   │   │   │   ├── value_objects.py
   │   │   │   ├── dto.py
   │   │   │   └── repository.py
-  │   │   └── infrastructure/
-  │   │       └── persistence/
-  │   │           ├── models.py
-  │   │           ├── mapper.py
-  │   │           └── repository_impl.py
+  │   │   ├── infrastructure/
+  │   │   │   └── persistence/
+  │   │   │       ├── models.py
+  │   │   │       ├── mapper.py
+  │   │   │       └── repository_impl.py
+  │   │   └── interface/
+  │   │       ├── views/
+  │   │       │     ├── product_list_views.py
+  │   │       │     └── product_detail_views.py
+  │   │       └── tests/
+  │   │             ├── test_product_list_api.py
+  │   │             └── test_product_detail_api.py
+  │   │
   │   ├── pricing/
   │   │   ├── application/
   │   │   │   ├── coupon_service.py
@@ -135,147 +145,11 @@ https://documenter.getpostman.com/view/36939512/2sB2qgey99
 
 ---
 
-## 레이어별 설명
-
-아래는 상기 폴더 구조에서 각 레이어가 어떤 역할을 하는지 간단히 정리한 내용입니다.
-
-### config
-- **위치**: `millie_backend/millie/config/`  
-- **설명**:  
-  - Django 전체 애플리케이션 설정 파일.  
-  - `settings.py`: 데이터베이스(MySQL), INSTALLED_APPS, 미들웨어, REST 프레임워크 설정 등.  
-  - `urls.py`: 애플리케이션 전역 URL 라우팅.  
-    - 현재 `"/api/v1/products"` 와 `"/api/v1/products/<code>"` 두 개의 엔드포인트를 연결.  
-  - `wsgi.py` / `asgi.py`: 웹 서버(Gunicorn/uWSGI, Daphne 등)와 연동용 진입점.
-
-### apps/utils
-- **위치**: `millie_backend/apps/utils/`  
-- **설명**:  
-  - 전역으로 사용되는 상수(`const.py`)와 공통 유틸리티 함수들을 모아둔 곳.  
-  - 예를 들어 응답 형식에서 사용하는 `CODE`, `MESSAGE`, `DATA` 등의 키 값을 정의함.
-
-### apps/product
-상품 관련 비즈니스 로직(도메인)을 총괄하는 모듈입니다.
-
-#### interface
-- **위치**: `.../apps/product/interface/`  
-- **내용**:  
-  - **APIView (Controller)**  
-    - `ProductListView`: `/api/v1/products` (상품 목록 조회)  
-    - `ProductDetailView`: `/api/v1/products/<code>` (상품 상세 + 가격 계산)  
-  - **Serializer**  
-    - `ProductSerializer`: 도메인 객체(`ProductEntity`)를 serialize하여 JSON 형태로 변환.  
-  - **역할**:  
-    - HTTP 요청을 받아 **요청 파라미터 검증** → `UseCase` 호출 → 응답 데이터 serialize → HTTP 응답 반환.
-
-#### application
-- **위치**: `.../apps/product/application/`  
-- **내용**:  
-  - `product_list_use_case.py`: 모든 상품을 조회하는 비즈니스 로직.  
-  - `product_detail_use_case.py`: 특정 상품 코드로 상품을 조회하고, 할인/쿠폰 정책을 적용하여 최종 가격을 계산하는 로직.  
-  - `tests/`: 유스케이스 중심 단위 테스트. (`test_product_detail_use_case.py` 등)  
-- **역할**:  
-  - 도메인 레이어(Repository Interface)만 참조하여 순수 비즈니스 로직을 수행.  
-  - 검증 로직(`validate()`), 엔티티 생성/가공, 필요 시 다른 유스케이스(가격 계산) 호출 등을 담당.  
-  - 외부에 드러나는 세부 인프라(ORM, DB, HTTP 등) 없이 **테스트 가능한** 순수 코드로 구현됨.
-
-#### domain
-- **위치**: `.../apps/product/domain/`  
-- **내용**:  
-  - `entity.py`: `Product` 도메인 엔티티 정의 (예: 코드, 이름, 가격, 상태, 상세 정보, 저자, 출판정보 등).  
-  - `value_objects.py`: `ProductStatus` (예: `ACTIVE`, `INACTIVE`) 등 상품 관련 값 객체 정의.  
-  - `dto.py`: 도메인 레이어 내부에서 필요 시 사용하는 데이터 전달 객체(DTO) 정의.  
-  - `repository.py`: `ProductRepository` 인터페이스 정의 (메서드: `get_products()`, `get_product_by_code(code)` 등).  
-- **역할**:  
-  - **도메인 순수 모델**을 정의하여 비즈니스 규칙을 캡슐화.  
-  - 외부 구현체(PRISMA, Django ORM, SQLAlchemy 등)에 독립적.  
-  - 유스케이스에서 직접 참조하여 도메인 로직을 수행.
-
-#### infrastructure
-- **위치**: `.../apps/product/infrastructure/persistence/`  
-- **내용**:  
-  - **Django ORM 모델** (`models.py`): 실제 DB 스키마(테이블) 정의 (`Book`, `BookDetail`, `Author`, `PublishInfo`, `Feature` 등).  
-  - **Mapper** (`mapper.py`): ORM 모델 인스턴스를 도메인 엔티티(`ProductEntity`)로 변환하는 매핑 로직.  
-  - **Repository 구현체** (`repository_impl.py`): `ProductRepository` 인터페이스를 Django ORM으로 구현  
-    - `get_products()`: ORM 쿼리 후, 매퍼를 통해 도메인 객체 리스트 반환  
-    - `get_product_by_code(code)`: ORM으로 특정 코드 검색 → 도메인 객체 반환  
-- **역할**:  
-  - 도메인에서 정의된 인터페이스(`ProductRepository`)를 실제 DB와 연결하여 구현.  
-  - 매퍼를 활용해 ORM 모델 ↔ 도메인 객체 간 변환을 담당함으로써, 유스케이스와 도메인을 ORM에 종속되지 않게 유지.
-
----
-
-### apps/pricing
-상품 가격(할인/쿠폰) 관련 비즈니스 로직을 담당하는 모듈입니다.
-
-#### interface
-- **위치**: `.../apps/pricing/interface/`  
-- **내용**:  
-  - `serializer.py`:  
-    - `CouponSummarySerializer`: 쿠폰 도메인 엔티티 → JSON serialize  
-    - `PriceResultSerializer`: 가격 계산 결과(`PriceResult` 도메인 엔티티) → JSON serialize  
-- **역할**:  
-  - 가격 계산용 데이터(쿠폰 목록, 할인 결과 등)를 HTTP 응답에 맞는 JSON 형태로 변환.  
-  - 실제 HTTP 요청/응답 로직은 `ProductDetailView`에서 이루어지며, 이곳에서 serialize만 수행.
-
-#### application
-- **위치**: `.../apps/pricing/application/`  
-- **내용**:  
-  - `discount_service.py`:  
-    - 할인 정책을 조회하여 적용하는 비즈니스 로직.  
-    - `get_discount_policies(...)`를 통해 **적용 가능한 할인 전략** 리스트를 조회 후, 최적 전략을 선택해 적용.  
-  - `coupon_service.py`:  
-    - 입력된 쿠폰 코드 리스트를 받아 유효한 쿠폰 도메인 객체(`CouponDomainEntity`) 반환.  
-    - 쿠폰 사용 가능 여부(`is_available`) 검증 후, 최종적으로 사용할 쿠폰을 결정.  
-- **역할**:  
-  - 도메인 레이어(`DiscountPolicyRepository`, `CouponRepository`)를 통해 **원천 데이터**(DB의 정책/쿠폰 테이블) 조회  
-  - 조회한 할인/쿠폰 정보를 기반으로 **할인 로직**을 실행  
-  - 반환된 도메인 객체를 제품 상세 유스케이스에 전달
-
-#### domain
-- **위치**: `.../apps/pricing/domain/`  
-- **내용**:  
-  1. **엔티티(Entity)**  
-     - `Coupon` (`coupon.py`): 쿠폰 고유 속성(code, valid_until, discount 정책 변환 메서드 등)  
-     - `PriceResult` (`price_result.py`): 가격 계산 결과(원가(original), 할인 가격(discounted), 할인 금액(discount_amount), 할인 타입 등)  
-  2. **값 객체(Value Object)**  
-     - `DiscountType` (정액, 정률 구분)  
-  3. **리포지토리 인터페이스(Repository Interface)**  
-     - `DiscountPolicyRepository`: `get_discount_policies(target_product_code, target_user_id)`, `get_coupons_by_code(codes)` 등  
-     - `CouponRepository`
-     - `PromotionRepository`
-  4. **정책(Policy)**  
-     - `DiscountPolicy` 추상 클래스 (인터페이스 역할)  
-     - `PercentageDiscountPolicy`, `FixedDiscountPolicy` 등 구체 클래스  
-- **역할**:  
-  - **가격 관련 핵심 규칙**(할인율 계산, 정액 할인 적용 등)을 순수 비즈니스 코드로 캡슐화  
-  - 애플리케이션 서비스(`discount_service`, `coupon_service`)는 오직 이 인터페이스만 참조 → 구현체 독립성 확보
-
-#### infrastructure
-- **위치**: `.../apps/pricing/infrastructure/persistence/`  
-- **내용**:  
-  - **Django ORM 모델** (`models.py`):  
-    - `DiscountPolicyModel`: 할인 정책 테이블  
-    - `CouponModel`: 쿠폰 테이블  
-  - **Mapper** (`mapper.py`):  
-    - ORM 모델 인스턴스 → 도메인 엔티티 (`Coupon`, `DiscountPolicyStrategy`) 변환 로직  
-  - **Repository 구현체** (`repository_impl.py`):  
-    - `DiscountPolicyRepoImpl`: `DiscountPolicyRepository` 인터페이스를 Django ORM 기반으로 구현  
-      - `get_discount_policies(...)`: 현재 유효한 정책들을 조회 후, `PercentageDiscountPolicy` 또는 `FixedDiscountPolicy` 인스턴스로 변환하여 반환  
-      - `get_coupons_by_code(...)`: 쿠폰 코드 목록 조회 후, 유효 기간(`valid_until`) 체크하여 도메인 객체 리스트 반환  
-- **역할**:  
-  - 도메인 레이어가 정의한 **인터페이스**를 실제 DB 쿼리로 연결  
-  - 정책이나 쿠폰 정보가 바뀌어도, 매퍼만 수정하면 도메인 로직은 그대로 재사용 가능
-
-
-
----
-
 
 ## 주요 기능
 
 ### 상품 리스트 조회
-1. **HTTP 요청**: GET /api/v1/products
+1. **HTTP 요청**: [GET] /api/v1/products
 
 2. **흐름**:  
   - `ProductListView`(interface)에서 요청을 받는다.  
@@ -343,63 +217,151 @@ https://documenter.getpostman.com/view/36939512/2sB2qgey99
 
 ```
 
-### 상품 상세 페이지: 가격 계산 로직
-1. **HTTP 요청**: /api/v1/products/{code}?coupon_code=COUPON01&coupon_code=COUPON03
+### 상품 상세 페이지
+1. **HTTP 요청**: [GET]/api/v1/products/{code}
 
 2. **흐름**:
     - `ProductDetailView`(interface)에서 {code}, coupon_code를 추출하여 `ProductDetailUseCase` 호출.
     - 상품 조회: `ProductRepositoryImpl.get_product_by_code(code)` → 도메인 `ProductEntity` 반환.
-    - 할인:
-        - `DiscountService.apply_policy(user, product_code, base_price)` 호출
-        - `DiscountPolicyRepoImpl.get_discount_policies(...)` → 도메인 `DiscountPolicyStrategy 리스트` 반환
-        - 전략을 골라 apply()
-    - 쿠폰 적용:
-        - `CouponService.get_coupons_by_code([“COUPON01”, “COUPON05”])` → 도메인 `CouponDomainEntity 리스트` 반환
-        - 각 쿠폰마다 is_available(user, product_code) 확인
-        - `CouponDomainEntity.to_discount_policy()` 로 `DiscountPolicyStrategy` 생성 후, 현재 할인 가격에 apply()
-    - 최종 PriceResult 계산 후 응답 serialize
-
 
 3. **예시 응답**:
 ```json
-    {
-        "code": 200,
-        "message": "OK",
-        "data": {
-            "product": {
-                "code": "BOOK001",
-                "name": "테스트 도서 1",
-                "author": "저자 1",
-                "publisher": "출판사 1",
-                "published_date": "2023-01-01",
-                "price": "21000.00",
+{
+    "code": 200,
+    "message": "OK.",
+    "data": {
+        "product": {
+            "code": "BOOK001",
+            "name": "테스트 도서 1",
+            "price": 21000,
+            "status": "ACTIVE",
+            "created_at": "2025-05-29T15:49:02Z",
+            "updated_at": "2025-05-29T15:49:02Z",
+            "detail": {
+                "category": "FICTION",
+                "description": "이것은 테스트 도서 1의 설명입니다.",
+                "status": "VISIBLE",
                 "created_at": "2025-05-29T15:49:02Z",
                 "updated_at": "2025-05-29T15:49:02Z"
             },
-            "available_discounts": [
-                {
-                    "code": "COUPON01",
-                    "name": "테스트 쿠폰 1",
-                    "discount_type": "PERCENTAGE",
-                    "discount_value": "0.10"
-                },
-                {
-                    "code": "COUPON03",
-                    "name": "테스트 쿠폰 3",
-                    "discount_type": "PERCENTAGE",
-                    "discount_value": "0.20"
-                }
-            ],
-            "price_result": {
-                "original": "21000.00",
-                "discounted": "18900.00",
-                "discount_amount": "2100.00",
-                "discount_type": [
-                  "PERCENTAGE",
-                ],
+            "feature": {
+                "feature": "Feature Type 1",
+                "status": "VISIBLE",
+                "created_at": "2025-05-29T15:49:02Z",
+                "updated_at": "2025-05-29T15:49:02Z"
+            },
+            "publish_info": {
+                "publisher": "출판사 1",
+                "published_date": "2023-01-01",
+                "status": "VISIBLE",
+                "created_at": "2025-05-29T15:49:02Z",
+                "updated_at": "2025-05-29T15:49:02Z"
+            },
+            "author": {
+                "author": "저자 1",
+                "status": "VISIBLE",
+                "created_at": "2025-05-29T15:49:02Z",
+                "updated_at": "2025-05-29T15:49:02Z"
             }
-        }
+        },
+        "available_discount": [
+            {
+                "code": "COUPON01",
+                "name": "테스트 쿠폰 1",
+                "discount_type": "PERCENTAGE",
+                "discount_value": "0.10",
+                "target_type": "PRODUCT",
+                "target_product_code": "BOOK001",
+                "target_user_id": null,
+                "minimum_purchase_amount": "0.00",
+                "valid_until": "2025-12-31T23:59:59Z",
+                "status": "ACTIVE",
+                "created_at": "2025-05-31T15:21:46.855469Z"
+            },
+            {
+                "code": "COUPON03",
+                "name": "테스트 쿠폰 3",
+                "discount_type": "PERCENTAGE",
+                "discount_value": "0.20",
+                "target_type": "ALL",
+                "target_product_code": null,
+                "target_user_id": null,
+                "minimum_purchase_amount": "15000.00",
+                "valid_until": "2025-12-31T23:59:59Z",
+                "status": "ACTIVE",
+                "created_at": "2025-05-31T15:21:46.855469Z"
+            }
+        ]
     }
+}
+```
+
+
+
+
+### 상품 상세 > 쿠폰적용
+1. **HTTP 요청**: [POST] api/v1/pricing/apply-coupon/{code}
+ - body에 coupon_code라는 key로 적용가능한 쿠폰을 배열형태로 제공
+ - (예시) 
+ ```json
+
+   "coupon_code" : ["COUPON01", "COUPON02"]
+
+ ```
+
+2. **흐름**:
+    - `CouponApplyView`(interface)에서 {code}, coupon_code를 추출하여 `CalculatePriceUseCase` 호출.
+    -  쿠폰적용 및 최종 적용 및 결과계산: `CalculatePriceUseCase` → `PromotionService` (현재 진행되는 할인에 대한 연산 및 적용) , `CouponService`(요청된 쿠폰에 대한 연산 및 적용)
+
+3. **예시 응답**:
+```json
+{
+    "code": 200,
+    "message": "OK.",
+    "data": {
+        "price_result": {
+            "original": "21000.00",
+            "discounted": "13608.00",
+            "discount_amount": "7392.00",
+            "discount_types": [
+                "PERCENTAGE"
+            ]
+        },
+        "available_coupons": [
+            {
+                "code": "COUPON01",
+                "name": "테스트 쿠폰 1",
+                "discount_type": "PERCENTAGE",
+                "discount_value": "0.10",
+                "target_type": "PRODUCT",
+                "target_product_code": "BOOK001",
+                "target_user_id": null,
+                "minimum_purchase_amount": "0.00",
+                "valid_until": "2025-12-31T23:59:59Z",
+                "status": "ACTIVE",
+                "created_at": "2025-05-31T15:21:46.855469Z"
+            },
+            {
+                "code": "COUPON03",
+                "name": "테스트 쿠폰 3",
+                "discount_type": "PERCENTAGE",
+                "discount_value": "0.20",
+                "target_type": "ALL",
+                "target_product_code": null,
+                "target_user_id": null,
+                "minimum_purchase_amount": "15000.00",
+                "valid_until": "2025-12-31T23:59:59Z",
+                "status": "ACTIVE",
+                "created_at": "2025-05-31T15:21:46.855469Z"
+            }
+        ],
+        "applied_pricing_policies": [
+            "테스트 쿠폰 1",
+            "테스트 쿠폰 3",
+            "BOOK002 전용 10% 할인!!"
+        ]
+    }
+}
 ```
 
 
@@ -409,21 +371,26 @@ https://documenter.getpostman.com/view/36939512/2sB2qgey99
 
 [도메인 레이어(비즈니스 로직)테스트]
 
-test_만료된_쿠폰적용시도 (apps.product.application.tests.test_product_detail_use_case.ProductDetailUseCaseTest) ... ok
-test_사용자대상불일치_쿠폰적용시도 (apps.product.application.tests.test_product_detail_use_case.ProductDetailUseCaseTest) ... ok
-test_사용할_수_없는_상태의_쿠폰적용시도 (apps.product.application.tests.test_product_detail_use_case.ProductDetailUseCaseTest) ... ok
-test_상품대상불일치_쿠폰적용시도 (apps.product.application.tests.test_product_detail_use_case.ProductDetailUseCaseTest) ... ok
-test_없는_쿠폰적용시도 (apps.product.application.tests.test_product_detail_use_case.ProductDetailUseCaseTest) ... ok
-test_음수_최종가격_방어 (apps.product.application.tests.test_product_detail_use_case.ProductDetailUseCaseTest) ... ok
-test_중복_쿠폰코드_적용시도 (apps.product.application.tests.test_product_detail_use_case.ProductDetailUseCaseTest) ... ok
-test_최소적용금액_경계값_쿠폰적용 (apps.product.application.tests.test_product_detail_use_case.ProductDetailUseCaseTest) ... ok
-test_최소적용금액_안되는상품에_쿠폰적용시도 (apps.product.application.tests.test_product_detail_use_case.ProductDetailUseCaseTest) ... ok
-test_쿠폰순서에_따른_할인차이 (apps.product.application.tests.test_product_detail_use_case.ProductDetailUseCaseTest) ... ok
-test_쿠폰없으면_정가반환 (apps.product.application.tests.test_product_detail_use_case.ProductDetailUseCaseTest) ... ok
-test_쿠폰여러개_누적적용시_우선순위에_따라_할인 (apps.product.application.tests.test_product_detail_use_case.ProductDetailUseCaseTest) ... ok
-test_쿠폰한개적용시_할인 (apps.product.application.tests.test_product_detail_use_case.ProductDetailUseCaseTest) ... ok
-test_할인서비스_예외발생 (apps.product.application.tests.test_product_detail_use_case.ProductDetailUseCaseTest) ... ok
-
+test_만료된_쿠폰적용시도 (apps.pricing.application.tests.test_get_price_use_case.GetPriceUseCaseTest) ... ok
+test_복수쿠폰순서_반대로 (apps.pricing.application.tests.test_get_price_use_case.GetPriceUseCaseTest) ... ok
+test_부분리턴된쿠폰_무시 (apps.pricing.application.tests.test_get_price_use_case.GetPriceUseCaseTest) ... ok
+test_비활성쿠폰적용 (apps.pricing.application.tests.test_get_price_use_case.GetPriceUseCaseTest) ... ok
+test_사용자전용쿠폰_다른사용자 (apps.pricing.application.tests.test_get_price_use_case.GetPriceUseCaseTest) ... ok
+test_사용자전용쿠폰_정상유저 (apps.pricing.application.tests.test_get_price_use_case.GetPriceUseCaseTest) ... ok
+test_상품대상쿠폰_다른상품 (apps.pricing.application.tests.test_get_price_use_case.GetPriceUseCaseTest) ... ok
+test_상품대상쿠폰_정상적용 (apps.pricing.application.tests.test_get_price_use_case.GetPriceUseCaseTest) ... ok
+test_음수_최종가격_방어 (apps.pricing.application.tests.test_get_price_use_case.GetPriceUseCaseTest) ... ok
+test_전체쿠폰_여러개_적용_순서1 (apps.pricing.application.tests.test_get_price_use_case.GetPriceUseCaseTest) ... ok
+test_전체쿠폰_여러개_적용_순서2 (apps.pricing.application.tests.test_get_price_use_case.GetPriceUseCaseTest) ... ok
+test_중복쿠폰코드_전달 (apps.pricing.application.tests.test_get_price_use_case.GetPriceUseCaseTest) ... ok
+test_최소금액미만_쿠폰적용 (apps.pricing.application.tests.test_get_price_use_case.GetPriceUseCaseTest) ... ok
+test_프로모션만_빈쿠폰리스트 (apps.pricing.application.tests.test_get_price_use_case.GetPriceUseCaseTest) ... ok
+test_프로모션만_잘못된쿠폰코드 (apps.pricing.application.tests.test_get_price_use_case.GetPriceUseCaseTest) ... ok
+test_프로모션만_적용 (apps.pricing.application.tests.test_get_price_use_case.GetPriceUseCaseTest) ... ok
+test_프로모션없고_빈쿠폰리스트 (apps.pricing.application.tests.test_get_price_use_case.GetPriceUseCaseTest) ... ok
+test_프로모션없고_쿠폰만적용 (apps.pricing.application.tests.test_get_price_use_case.GetPriceUseCaseTest) ... ok
+test_프로모션후_복수쿠폰순서 (apps.pricing.application.tests.test_get_price_use_case.GetPriceUseCaseTest) ... ok
+test_프로모션후_쿠폰_적용 (apps.pricing.application.tests.test_get_price_use_case.GetPriceUseCaseTest) ... ok
 
 
 [인터페이스 레이어 테스트 - 상품 리스트조회]
@@ -433,21 +400,29 @@ test_product_list_returns_active_products (apps.product.interface.tests.test_pro
 GET /api/v1/products 호출 시, ... ok
 
 
-
-
 [인터페이스 레이어 테스트 - 상품 상세조회]
-test_product_detail_coupon_minimum_amount (apps.product.interface.tests.test_product_detail_api.ProductDetailAPITest)
-쿠폰 최소 구매 금액 조건 검사: ... ok
+test_additional_product_info_fields (apps.product.interface.tests.test_product_detail_api.ProductDetailAPITest)
+응답의 product 안에 'created_at'/'updated_at'이 ISO 8601 포맷 문자열로 들어가는지 확인 ... ok
 test_product_detail_inactive (apps.product.interface.tests.test_product_detail_api.ProductDetailAPITest)
 INACTIVE 상태의 상품 조회 → 404 Not Found ... ok
+test_product_detail_nested_relations (apps.product.interface.tests.test_product_detail_api.ProductDetailAPITest)
+ACTIVE 상태의 상품 조회 시, nested한 detail/feature/publish_info/author 정보가 응답에 포함되는지 확인 ... ok
 test_product_detail_not_found (apps.product.interface.tests.test_product_detail_api.ProductDetailAPITest)
-존재하지 않는 상품 코드 조회 → NotFoundError로 404 Not Found ... ok
-test_product_detail_with_invalid_coupon_code (apps.product.interface.tests.test_product_detail_api.ProductDetailAPITest)
-ACTIVE 상품에 잘못된 coupon_code 넘겨도 200 OK, ... ok
-test_product_detail_with_valid_coupon (apps.product.interface.tests.test_product_detail_api.ProductDetailAPITest)
-ACTIVE 상품에 유효한 쿠폰 생성 후 coupon_code로 넘기면, ... ok
+존재하지 않는 상품 코드 조회 → 404 Not Found ... ok
 test_product_detail_without_coupon (apps.product.interface.tests.test_product_detail_api.ProductDetailAPITest)
-ACTIVE 상태의 상품 조회, coupon_code 파라미터 없을 때 ... ok
+ACTIVE 상태의 상품 조회 시, ... ok
+
+
+[인터페이스 레이어 테스트 - 쿠폰 및 할인 적용]
+test_bad_request_extra_params (apps.pricing.interface.tests.test_coupon_apply_api.ApplyCouponAPITest) ... ok
+test_internal_error_returns_500 (apps.pricing.interface.tests.test_coupon_apply_api.ApplyCouponAPITest)
+CalculatePriceUseCase.execute()가 일반 Exception을 던지면 500을 반환해야 한다. ... ok
+test_product_not_found_returns_404 (apps.pricing.interface.tests.test_coupon_apply_api.ApplyCouponAPITest)
+CalculatePriceUseCase.fetch()가 NotFoundException을 던지면 404를 반환해야 한다. ... ok
+test_successful_apply_returns_200 (apps.pricing.interface.tests.test_coupon_apply_api.ApplyCouponAPITest)
+fetch, validate, execute가 모두 성공하면 200을 반환하고, 직렬화된 결과가 와야 한다. ... ok
+test_validate_failure_returns_404 (apps.pricing.interface.tests.test_coupon_apply_api.ApplyCouponAPITest)
+CalculatePriceUseCase.validate()가 NotFoundException을 던지면 404를 반환해야 한다. ... ok
 
 
 ```

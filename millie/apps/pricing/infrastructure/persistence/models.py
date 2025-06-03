@@ -21,6 +21,7 @@ class DiscountPolicy(models.Model):
         null=False,
         db_comment="할인 정책 타입"
     )
+    apply_priority = models.IntegerField(default=0, db_comment="적용 우선순위")
     is_active = models.BooleanField(default=True, db_comment="활성 상태")
     minimum_purchase_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0, db_comment="최소 구매 금액")
     effective_start_at = models.DateTimeField(null=False, db_comment="시작 일자")
@@ -38,7 +39,7 @@ class DiscountTarget(models.Model):
     discount_policy = models.ForeignKey(DiscountPolicy, null=False, on_delete=models.CASCADE, db_comment="할인 정책")
     target_user = models.ForeignKey("User", to_field="id", null=True, on_delete=models.CASCADE, db_comment="사용자에 적용되는 경우 값 있음")
     target_product_code = models.ForeignKey(Book, to_field="code", null=True, on_delete=models.CASCADE, db_comment="상품에 적용되는 경우 값 있음")
-    apply_priority = models.IntegerField(null=False, db_comment="적용 우선순위")
+    apply_priority = models.IntegerField(null=False, db_comment="적용 우선순위") # 타겟(상품, 유저별로 우선순위 다를 경우를 고려하여 설계만 잡아놓음)
     created_at = models.DateTimeField(auto_now_add=True, null=False)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -66,17 +67,8 @@ class Promotion(models.Model):
     id = models.UUIDField(primary_key=True, default=UUID, editable=False)
     name = models.CharField(max_length=255)
     discount_policy = models.ForeignKey(DiscountPolicy, on_delete=models.CASCADE)
-
-    target_user = models.ForeignKey("User", null=True, on_delete=models.CASCADE)
-    target_product_code = models.ForeignKey(Book, to_field="code", null=True, on_delete=models.CASCADE)
-
-    is_active = models.BooleanField(default=True)
+    status = models.CharField(max_length=255, null=False, db_comment="사용 상태")
     is_auto_discount = models.BooleanField(default=False)
-    apply_priority = models.IntegerField(default=0)
-
-    effective_start_at = models.DateTimeField()
-    effective_end_at = models.DateTimeField()
-
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

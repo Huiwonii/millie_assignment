@@ -12,7 +12,7 @@ from apps.product.infrastructure.persistence.models import Book as BookModel
 from apps.utils.exceptions import NotFoundException
 
 
-class ProductRepositoryImpl(ProductRepository):
+class ProductRepoImpl(ProductRepository):
 
     def __init__(self):
         self.mapper = ProductMapper()
