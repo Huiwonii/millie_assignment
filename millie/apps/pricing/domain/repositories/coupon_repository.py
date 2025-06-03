@@ -18,7 +18,8 @@ class CouponRepository(ABC):
     def get_coupons_by_code(
         self,
         coupon_code: List[str],
-    ) -> Optional[Coupon]:
+        is_valid: bool = True,
+    ) -> List[Optional[Coupon]]:
         pass
 
 

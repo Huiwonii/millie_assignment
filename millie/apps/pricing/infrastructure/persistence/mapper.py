@@ -4,10 +4,12 @@ from apps.pricing.domain.policy.discount_policy import (
     FixedDiscountPolicy,
     PercentageDiscountPolicy,
 )
+from apps.pricing.domain.entity.promotion import Promotion as PromotionEntity
 from apps.pricing.domain.value_objects import DiscountType
 from apps.pricing.infrastructure.persistence.models import Coupon as CouponModel
 from apps.pricing.infrastructure.persistence.models import DiscountPolicy as DiscountPolicyModel
 from apps.pricing.infrastructure.persistence.models import DiscountTarget as DiscountTargetModel
+from apps.pricing.infrastructure.persistence.models import Promotion as PromotionModel
 
 
 class CouponMapper:
@@ -67,3 +69,21 @@ class DiscountPolicyMapper:
                 discount_type=model.discount_type,
                 discount_amount=model.value,
             )
+
+
+class PromotionMapper:
+
+    def __init__(self):
+        self.discount_policy_mapper = DiscountPolicyMapper()
+
+    def to_domain(self, promotion_model: PromotionModel) -> PromotionEntity:
+
+        return PromotionEntity(
+            id=promotion_model.id,
+            name=promotion_model.name,
+            discount_policy=self.discount_policy_mapper.to_domain(promotion_model.discount_policy),
+            is_auto_discount=promotion_model.is_auto_discount,
+            apply_priority=promotion_model.discount_policy.apply_priority,
+            created_at=promotion_model.created_at,
+            updated_at=promotion_model.updated_at,
+        )

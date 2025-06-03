@@ -2,6 +2,7 @@ from decimal import Decimal
 from typing import (
     List,
     Optional,
+    Tuple,
 )
 
 from apps.pricing.domain.entity.price_result import PriceResult as PriceResultEntity
@@ -21,9 +22,13 @@ class PromotionService:
         product_code: str,
         original_price: Decimal,
         user = None,
-    ) -> PriceResultEntity:
+    ) -> Tuple[PriceResultEntity, bool]:
+        # NOTE!
+        # 프로모션 코드이면서 쿠폰 코드인것은 없다고 가정하였습니다.
+        # 한 상품에 적용되는 프로모션 할인은 우선선위 높은것 하나만 가져오도록 하였습니다.
 
-        strategy_list: Optional[List[DiscountPolicy]] = self._repo.get_active_promotions(
+        has_promotion = False
+        strategy_list = self._repo.get_active_promotions(
             target_product_code=product_code,
             target_user_id=user.id if user else None,
         )
@@ -32,6 +37,10 @@ class PromotionService:
                 original=original_price,
                 discounted=original_price,
                 discount_amount=Decimal("0"),
-            )
-        highest_priority_strategy = strategy_list[0]
-        return highest_priority_strategy.apply(original_price)
+            ), False, None
+
+        has_promotion = True
+        promotion = strategy_list[0]
+        applied_promotion = promotion.name
+
+        return promotion.to_discount_policy().apply(original_price), has_promotion, applied_promotion

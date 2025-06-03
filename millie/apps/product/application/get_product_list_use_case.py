@@ -4,7 +4,8 @@ from apps.product.domain.repository import ProductRepository
 from apps.product.domain.entity import Product as ProductEntity
 
 
-class ProductListUseCase:
+class GetProductListUseCase:
+
     def __init__(
         self,
         product_repo: ProductRepository,

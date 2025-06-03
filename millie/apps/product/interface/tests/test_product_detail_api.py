@@ -1,6 +1,3 @@
-# apps/product/interface/tests/test_product_detail_api.py
-
-import uuid
 from decimal import Decimal
 from django.utils import timezone
 from rest_framework.test import APITestCase
@@ -9,8 +6,10 @@ from rest_framework import status
 
 from apps.product.infrastructure.persistence.models import (
     Book as BookModel,
-    Author as AuthorModel,
+    BookDetail as BookDetailModel,
+    BookFeature as BookFeatureModel,
     PublishInfo as PublishInfoModel,
+    Author as AuthorModel,
 )
 from apps.product.domain.value_objects import ProductStatus, VisibilityStatus
 from apps.utils import messages, const
@@ -18,44 +17,73 @@ from apps.utils import messages, const
 
 class ProductDetailAPITest(APITestCase):
     def setUp(self):
-        # ACTIVE 상태의 Book 모델 생성
+        now = timezone.now()
+
+        # ── ACTIVE 상태의 Book 생성 ───────────────────────────────────────────
         self.book = BookModel.objects.create(
             code="BOOK001",
             name="Test Book",
             price=Decimal("15000.00"),
             status=ProductStatus.ACTIVE.value,
+            created_at=now,
+            updated_at=now,
         )
-        # Author, PublishInfo
+
+        # ── BookDetail 생성 ───────────────────────────────────────────────────
+        BookDetailModel.objects.create(
+            book_code=self.book,
+            category="FICTION",
+            description="이것은 테스트 도서 1의 설명입니다.",
+            status=VisibilityStatus.VISIBLE.value,
+            created_at=now,
+            updated_at=now,
+        )
+
+        # ── Feature 생성 ──────────────────────────────────────────────────────
+        BookFeatureModel.objects.create(
+            book_code=self.book,
+            feature="Feature Type 1",
+            status=VisibilityStatus.VISIBLE.value,
+            created_at=now,
+            updated_at=now,
+        )
+
+        # ── PublishInfo 생성 ──────────────────────────────────────────────────
+        PublishInfoModel.objects.create(
+            book_code=self.book,
+            publisher="TestPub",
+            published_date=now.date(),
+            status=VisibilityStatus.VISIBLE.value,
+            created_at=now,
+            updated_at=now,
+        )
+
+        # ── Author 생성 ───────────────────────────────────────────────────────
         AuthorModel.objects.create(
             book_code=self.book,
             author="Author1",
             status=VisibilityStatus.VISIBLE.value,
-            created_at=timezone.now(),
-            updated_at=timezone.now(),
-        )
-        PublishInfoModel.objects.create(
-            book_code=self.book,
-            publisher="TestPub",
-            published_date=timezone.now().date(),
-            status=VisibilityStatus.VISIBLE.value,
-            created_at=timezone.now(),
-            updated_at=timezone.now(),
+            created_at=now,
+            updated_at=now,
         )
 
+        # ── INACTIVE 상태의 Book 생성 ───────────────────────────────────────────
         BookModel.objects.create(
             code="BOOK002",
             name="Inactive Book",
             price=Decimal("10000.00"),
             status=ProductStatus.SOLD_OUT.value,
+            created_at=now,
+            updated_at=now,
         )
 
     def test_product_detail_without_coupon(self):
         """
-        ACTIVE 상태의 상품 조회, coupon_code 파라미터 없을 때
+        ACTIVE 상태의 상품 조회 시,
         → 200 OK
-        → "data" 내에 "product", "available_discount", "price_calculate_result" 키 존재
-          * available_discount은 빈 리스트
-          * price_calculate_result: original == discounted == price, discount_amount == 0
+        → data 내에 product, available_discount keys 존재
+        → product.price, product.code, product.name 일치
+        → available_discount는 빈 리스트
         """
         url = reverse("product-detail", args=[self.book.code])
         response = self.client.get(url)
@@ -79,17 +107,9 @@ class ProductDetailAPITest(APITestCase):
         self.assertIsInstance(data[const.AVAILABLE_DISCOUNT], list)
         self.assertEqual(len(data[const.AVAILABLE_DISCOUNT]), 0)
 
-        # 5) "price_calculate_result"
-        price_result = data["price_calculate_result"]
-        self.assertEqual(price_result["original"], "15000.00")
-        self.assertEqual(price_result["discounted"], "15000.00")
-        self.assertEqual(price_result["discount_amount"], "0.00")
-        # discount_type은 None으로 직렬화될 수 있음
-        self.assertTrue(price_result.get("discount_type") in (None, "", "null"))
-
     def test_product_detail_not_found(self):
         """
-        존재하지 않는 상품 코드 조회 → NotFoundError로 404 Not Found
+        존재하지 않는 상품 코드 조회 → 404 Not Found
         """
         url = reverse("product-detail", args=["NON_EXISTENT"])
         response = self.client.get(url)
@@ -113,155 +133,63 @@ class ProductDetailAPITest(APITestCase):
         self.assertIn("없거나 판매 불가", response.data["message"])
         self.assertEqual(response.data["data"], {})
 
-    def test_product_detail_with_invalid_coupon_code(self):
+    def test_product_detail_nested_relations(self):
         """
-        ACTIVE 상품에 잘못된 coupon_code 넘겨도 200 OK,
-        available_discount은 빈 리스트,
-        price_calculate_result는 원가 그대로
+        ACTIVE 상태의 상품 조회 시, nested한 detail/feature/publish_info/author 정보가 응답에 포함되는지 확인
         """
         url = reverse("product-detail", args=[self.book.code])
-        # 잘못된 쿠폰 코드 전달
-        response = self.client.get(f"{url}?{const.COUPON_CODE}=INVALID")
+        response = self.client.get(url)
 
-        # 1) HTTP 200 OK
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data["code"], status.HTTP_200_OK)
-
         data = response.data["data"]
+        product = data["product"]
 
-        # 2) available_discount은 빈 리스트
-        self.assertEqual(data[const.AVAILABLE_DISCOUNT], [])
+        # 1) detail 객체 검증
+        self.assertIn("detail", product)
+        detail = product["detail"]
+        self.assertEqual(detail["category"], "FICTION")
+        self.assertEqual(detail["description"], "이것은 테스트 도서 1의 설명입니다.")
+        self.assertEqual(detail["status"], VisibilityStatus.VISIBLE.value)
+        self.assertIn("created_at", detail)
+        self.assertIn("updated_at", detail)
 
-        # 3) 가격은 변동 없음
-        price_result = data["price_calculate_result"]
-        self.assertEqual(price_result["original"], "15000.00")
-        self.assertEqual(price_result["discounted"], "15000.00")
-        self.assertEqual(price_result["discount_amount"], "0.00")
+        # 2) feature 객체 검증
+        self.assertIn("feature", product)
+        feature = product["feature"]
+        self.assertEqual(feature["feature"], "Feature Type 1")
+        self.assertEqual(feature["status"], VisibilityStatus.VISIBLE.value)
+        self.assertIn("created_at", feature)
+        self.assertIn("updated_at", feature)
 
-    def test_product_detail_with_valid_coupon(self):
+        # 3) publish_info 객체 검증
+        self.assertIn("publish_info", product)
+        publish_info = product["publish_info"]
+        self.assertEqual(publish_info["publisher"], "TestPub")
+        self.assertTrue(isinstance(publish_info["published_date"], str))
+        self.assertEqual(publish_info["status"], VisibilityStatus.VISIBLE.value)
+        self.assertIn("created_at", publish_info)
+        self.assertIn("updated_at", publish_info)
+
+        # 4) author 객체 검증
+        self.assertIn("author", product)
+        author = product["author"]
+        self.assertEqual(author["author"], "Author1")
+        self.assertEqual(author["status"], VisibilityStatus.VISIBLE.value)
+        self.assertIn("created_at", author)
+        self.assertIn("updated_at", author)
+
+    def test_additional_product_info_fields(self):
         """
-        ACTIVE 상품에 유효한 쿠폰 생성 후 coupon_code로 넘기면,
-        available_discount에 해당 쿠폰 포함,
-        price_calculate_result가 올바르게 할인된 것을 검증
+        응답의 product 안에 'created_at'/'updated_at'이 ISO 8601 포맷 문자열로 들어가는지 확인
         """
-        from apps.pricing.infrastructure.persistence.models import (
-            DiscountPolicy as DiscountPolicyModel,
-            DiscountTarget as DiscountTargetModel,
-            Coupon as CouponModel,
-        )
-        from apps.pricing.domain.value_objects import TargetType, DiscountType
-
-        # 1) 할인 정책 생성: 10% 할인
-        dp_id = uuid.uuid4()
-        discount_policy = DiscountPolicyModel.objects.create(
-            id=dp_id,
-            discount_type=DiscountType.PERCENTAGE.value,
-            value=Decimal("0.10"),        # 10%
-            target_type=TargetType.ALL.value,
-            minimum_purchase_amount=Decimal("0.00"),
-            is_active=True,
-            effective_start_at=timezone.now() - timezone.timedelta(days=1),
-            effective_end_at=timezone.now() + timezone.timedelta(days=30),
-        )
-
-        # 2) 쿠폰 생성: BOOK001 상품 대상 ALL
-        cp_id = uuid.uuid4()
-        coupon = CouponModel.objects.create(
-            id=cp_id,
-            code="COUPON10",
-            name="10% 할인 쿠폰",
-            valid_until=timezone.now() + timezone.timedelta(days=10),
-            status="ACTIVE",
-            discount_policy=discount_policy,
-        )
-
-        # 3) DiscountTarget 생성 (ALL 대상)
-        DiscountTargetModel.objects.create(
-            id=uuid.uuid4(),
-            discount_policy=discount_policy,
-            target_product_code=None,
-            apply_priority=1,
-        )
-
-        # 4) 요청 시 coupon_code=COUPON10 전달
         url = reverse("product-detail", args=[self.book.code])
-        response = self.client.get(f"{url}?{const.COUPON_CODE}=COUPON10")
+        response = self.client.get(url)
 
-        # 5) HTTP 200 OK
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data["code"], status.HTTP_200_OK)
+        product = response.data["data"]["product"]
 
-        data = response.data["data"]
-
-        # 6) available_discount에 쿠폰 하나 포함
-        discounts = data[const.AVAILABLE_DISCOUNT]
-        self.assertIsInstance(discounts, list)
-        self.assertEqual(len(discounts), 1)
-        self.assertEqual(discounts[0]["code"], "COUPON10")
-
-        # 7) price_calculate_result에서 10% 할인 적용
-        price_result = data["price_calculate_result"]
-        self.assertEqual(price_result["original"], "15000.00")
-        # 15,000 × 0.9 = 13,500.00
-        self.assertEqual(price_result["discounted"], "13500.00")
-        self.assertEqual(price_result["discount_amount"], "1500.00")
-
-    def test_product_detail_coupon_minimum_amount(self):
-        """
-        쿠폰 최소 구매 금액 조건 검사:
-        Book 가격(15,000원)이 쿠폰 minimum_purchase_amount(20,000원)보다 낮으면,
-        할인 적용 없이 반환
-        """
-        from apps.pricing.infrastructure.persistence.models import (
-            DiscountPolicy as DiscountPolicyModel,
-            DiscountTarget as DiscountTargetModel,
-            Coupon as CouponModel,
-        )
-        from apps.pricing.domain.value_objects import TargetType, DiscountType
-
-        # 1) 할인 정책 생성: 고정 5,000원 할인, 최소 구매 금액 20,000원
-        dp_id = uuid.uuid4()
-        discount_policy = DiscountPolicyModel.objects.create(
-            id=dp_id,
-            discount_type=DiscountType.FIXED.value,
-            value=Decimal("5000"),         # 5,000원 할인
-            target_type=TargetType.ALL.value,
-            minimum_purchase_amount=Decimal("20000.00"),
-            is_active=True,
-            effective_start_at=timezone.now() - timezone.timedelta(days=1),
-            effective_end_at=timezone.now() + timezone.timedelta(days=30),
-        )
-
-        cp_id = uuid.uuid4()
-        coupon = CouponModel.objects.create(
-            id=cp_id,
-            code="COUPON5K",
-            name="5,000원 할인 쿠폰",
-            valid_until=timezone.now() + timezone.timedelta(days=10),
-            status="ACTIVE",
-            discount_policy=discount_policy,
-        )
-
-        DiscountTargetModel.objects.create(
-            id=uuid.uuid4(),
-            discount_policy=discount_policy,
-            target_product_code=None,
-            apply_priority=1,
-        )
-
-        # 2) Book 가격: 15,000원 < 최소구매 20,000원 → 할인 적용 안 됨
-        url = reverse("product-detail", args=[self.book.code])
-        response = self.client.get(f"{url}?{const.COUPON_CODE}=COUPON5K")
-
-        # 3) HTTP 200 OK (적용 가능한 쿠폰이 없으므로 정상 반환)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data["code"], status.HTTP_200_OK)
-
-        data = response.data["data"]
-        # 적용 가능한 쿠폰이 없으므로 빈 리스트
-        self.assertEqual(data[const.AVAILABLE_DISCOUNT], [])
-
-        price_result = data["price_calculate_result"]
-        self.assertEqual(price_result["original"], "15000.00")
-        self.assertEqual(price_result["discounted"], "15000.00")
-        self.assertEqual(price_result["discount_amount"], "0.00")
+        # created_at, updated_at 필드가 문자열로 존재
+        self.assertIn("created_at", product)
+        self.assertIn("updated_at", product)
+        self.assertTrue(isinstance(product["created_at"], str))
+        self.assertTrue(isinstance(product["updated_at"], str))

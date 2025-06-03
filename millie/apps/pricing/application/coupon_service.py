@@ -34,9 +34,13 @@ class CouponService:
     def get_coupons_by_code(
         self,
         coupon_code: List[str],
-    ) -> Optional[CouponEntity]:
+        is_valid: bool = True,
+    ) -> List[Optional[CouponEntity]]:
 
-        coupon = self._repo.get_coupons_by_code(coupon_code)
-        if not coupon:
-            return None
-        return coupon
+        coupons = self._repo.get_coupons_by_code(
+            coupon_code=coupon_code,
+            is_valid=is_valid,
+        )
+        if not coupons:
+            return []
+        return coupons
